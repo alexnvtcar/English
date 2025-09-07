@@ -9324,16 +9324,57 @@ async function exitApp() {
         if (saveResult) {
 showNotification('Данные сохранены. Выход из приложения...', 'success');
 
-// Ждем немного, чтобы пользователь увидел уведомление
-setTimeout(() => {
-    // Закрываем приложение
-    if (window.close) {
-        window.close();
-    } else {
-        // Если window.close не работает, показываем сообщение
-        alert('Приложение готово к закрытию. Закройте вкладку вручную.');
-    }
-}, 1500);
+            // Ждем немного, чтобы пользователь увидел уведомление
+            setTimeout(() => {
+                // Пытаемся закрыть приложение разными способами
+                let closed = false;
+                
+                // Способ 1: window.close() (работает только если окно было открыто скриптом)
+                if (window.close && !window.opener) {
+                    try {
+                        window.close();
+                        closed = true;
+                    } catch (e) {
+                        console.log('window.close() не сработал:', e);
+                    }
+                }
+                
+                // Способ 2: Для PWA - попытка закрыть через history
+                if (!closed && window.history.length > 1) {
+                    try {
+                        window.history.back();
+                        closed = true;
+                    } catch (e) {
+                        console.log('history.back() не сработал:', e);
+                    }
+                }
+                
+                // Способ 3: Попытка закрыть через location
+                if (!closed) {
+                    try {
+                        window.location.href = 'about:blank';
+                        closed = true;
+                    } catch (e) {
+                        console.log('location.href не сработал:', e);
+                    }
+                }
+                
+                // Способ 4: Попытка закрыть через opener
+                if (!closed && window.opener) {
+                    try {
+                        window.opener = null;
+                        window.close();
+                        closed = true;
+                    } catch (e) {
+                        console.log('opener.close() не сработал:', e);
+                    }
+                }
+                
+                // Способ 5: Показать инструкции для закрытия
+                if (!closed) {
+                    showExitInstructions();
+                }
+            }, 1500);
         } else {
 showNotification('Ошибка сохранения. Выход отменен.', 'error');
         }
@@ -9343,10 +9384,69 @@ showNotification('Ошибка сохранения. Выход отменен.'
     }
 }
 
+// Функция показа инструкций по закрытию приложения
+function showExitInstructions() {
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>🚪 Закрытие приложения</h3>
+            </div>
+            <div style="padding: 20px;">
+                <p><strong>Данные сохранены успешно!</strong></p>
+                <p>Для закрытия приложения используйте один из способов:</p>
+                
+                <div style="margin: 15px 0; padding: 15px; background: #f8fafc; border-radius: 8px;">
+                    <h4 style="margin: 0 0 10px 0; color: #1e40af;">🖥️ На компьютере:</h4>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li><strong>Ctrl + W</strong> - закрыть вкладку</li>
+                        <li><strong>Alt + F4</strong> - закрыть окно</li>
+                        <li>Кликнуть <strong>✕</strong> в углу окна</li>
+                    </ul>
+                </div>
+                
+                <div style="margin: 15px 0; padding: 15px; background: #f8fafc; border-radius: 8px;">
+                    <h4 style="margin: 0 0 10px 0; color: #059669;">📱 В PWA приложении:</h4>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li>Нажать <strong>Alt + F4</strong></li>
+                        <li>Использовать <strong>Ctrl + W</strong></li>
+                        <li>Закрыть через диспетчер задач</li>
+                    </ul>
+                </div>
+                
+                <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="margin: 0; font-size: 14px; color: #92400e;">
+                        💡 <strong>Совет:</strong> В следующий раз используйте кнопку "Сохранить" перед выходом для автоматического сохранения.
+                    </p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px; padding: 0 20px 20px;">
+                <button class="btn btn-primary" onclick="this.closest('.modal').remove()">Понятно</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
 // Регистрируем функцию глобально
 if (typeof window !== 'undefined') {
     window.exitApp = exitApp;
     console.log('exitApp function registered globally at end of file');
+    
+    // Добавляем горячие клавиши для выхода
+    document.addEventListener('keydown', function(event) {
+        // Ctrl + Q для выхода
+        if (event.ctrlKey && event.key === 'q') {
+            event.preventDefault();
+            exitApp();
+        }
+        // Alt + F4 для выхода (если поддерживается)
+        if (event.altKey && event.key === 'F4') {
+            event.preventDefault();
+            exitApp();
+        }
+    });
 }
         
         

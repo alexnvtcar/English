@@ -1,7 +1,7 @@
 // Service Worker для PWA - версия без диалогов обновления
-const CACHE_NAME = 'english-learning-v1.4.0';
-const STATIC_CACHE = 'static-v1.4.0';
-const DYNAMIC_CACHE = 'dynamic-v1.4.0';
+const CACHE_NAME = 'english-learning-v1.5.0-ios';
+const STATIC_CACHE = 'static-v1.5.0-ios';
+const DYNAMIC_CACHE = 'dynamic-v1.5.0-ios';
 
 // Файлы для кэширования
 const STATIC_FILES = [
@@ -223,4 +223,22 @@ self.addEventListener('message', (event) => {
   }
 });
 
-console.log('✅ Service Worker v1.4.0 загружен - БЕЗ диалогов обновления');
+// Специальная обработка для iOS
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('🍎 iOS: Принудительное обновление Service Worker');
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    console.log('🍎 iOS: Очистка кэша');
+    caches.keys().then(names => {
+      names.forEach(name => {
+        caches.delete(name);
+        console.log('🗑️ iOS: Кэш удален:', name);
+      });
+    });
+  }
+});
+
+console.log('✅ Service Worker v1.5.0-ios загружен - БЕЗ диалогов обновления');

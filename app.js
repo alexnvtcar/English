@@ -2809,6 +2809,142 @@ function checkDeviceCapabilities() {
     return { isMobile, isIOS, isAndroid };
 }
 
+// Специальная инициализация для iOS
+function handleIOSInitialization() {
+    console.log('🍎 Настройка iOS...');
+    
+    // Принудительно очищаем кэш
+    if ('caches' in window) {
+        caches.keys().then(function(names) {
+            names.forEach(function(name) {
+                caches.delete(name);
+                console.log('🗑️ Очищен кэш:', name);
+            });
+        });
+    }
+    
+    // Принудительно обновляем Service Worker для iOS
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            registrations.forEach(function(registration) {
+                registration.unregister().then(function(boolean) {
+                    console.log('🗑️ Service Worker удален:', boolean);
+                });
+            });
+        });
+        
+        // Регистрируем новый Service Worker
+        setTimeout(() => {
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(function(registration) {
+                    console.log('✅ Service Worker зарегистрирован для iOS:', registration);
+                })
+                .catch(function(error) {
+                    console.error('❌ Ошибка регистрации Service Worker для iOS:', error);
+                });
+        }, 1000);
+    }
+    
+    // Принудительно обновляем localStorage
+    try {
+        const currentTime = Date.now();
+        localStorage.setItem('ios_last_update', currentTime.toString());
+        console.log('🔄 Обновлен timestamp для iOS:', currentTime);
+    } catch (error) {
+        console.error('❌ Ошибка обновления localStorage для iOS:', error);
+    }
+    
+    // Принудительно сбрасываем состояние приложения
+    appState.isVerified = false;
+    appState.currentUser = null;
+    appState.isLoggedIn = false;
+    
+    // Очищаем DOM кэш
+    Object.keys(DOM_CACHE).forEach(key => {
+        DOM_CACHE[key] = null;
+    });
+    
+    console.log('🍎 iOS инициализация завершена');
+}
+
+// Принудительная синхронизация с Firebase для iOS
+async function syncWithFirebase() {
+    console.log('🔄 Принудительная синхронизация с Firebase...');
+    
+    try {
+        // Загружаем данные из Firebase
+        const docRef = doc(db, 'app-data', 'main');
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            const firebaseData = docSnap.data();
+            console.log('📥 Данные получены из Firebase:', firebaseData);
+            
+            // Принудительно обновляем состояние приложения
+            if (firebaseData.tasks) {
+                appState.tasks = firebaseData.tasks;
+                console.log('✅ Задачи синхронизированы');
+            }
+            
+            if (firebaseData.achievements) {
+                appState.achievements = firebaseData.achievements;
+                console.log('✅ Достижения синхронизированы');
+            }
+            
+            if (firebaseData.rewards) {
+                appState.rewards = firebaseData.rewards;
+                console.log('✅ Награды синхронизированы');
+            }
+            
+            if (firebaseData.pinCodes) {
+                appState.pinCodes = firebaseData.pinCodes;
+                console.log('✅ PIN коды синхронизированы');
+            }
+            
+            // Обновляем UI
+            updateUI();
+            console.log('🔄 UI обновлен после синхронизации');
+            
+            showNotification('Данные синхронизированы с сервером', 'success');
+        } else {
+            console.log('⚠️ Данные в Firebase не найдены');
+            showNotification('Данные в Firebase не найдены', 'warning');
+        }
+    } catch (error) {
+        console.error('❌ Ошибка синхронизации с Firebase:', error);
+        showNotification('Ошибка синхронизации: ' + error.message, 'error');
+    }
+}
+
+// Добавление кнопки синхронизации для iOS
+function addIOSSyncButton() {
+    console.log('🍎 Добавление кнопки синхронизации для iOS...');
+    
+    // Находим контейнер настроек
+    const settingsMenu = document.getElementById('settingsMenu');
+    if (!settingsMenu) {
+        console.log('⚠️ Меню настроек не найдено');
+        return;
+    }
+    
+    // Создаем кнопку синхронизации
+    const syncButton = document.createElement('div');
+    syncButton.className = 'settings-item';
+    syncButton.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+    syncButton.style.color = 'white';
+    syncButton.style.borderRadius = '8px';
+    syncButton.style.margin = '4px 0';
+    syncButton.style.fontWeight = '600';
+    syncButton.innerHTML = '🔄 Синхронизировать с сервером';
+    syncButton.onclick = function() {
+        syncWithFirebase();
+    };
+    
+    // Добавляем кнопку в меню настроек
+    settingsMenu.appendChild(syncButton);
+    console.log('✅ Кнопка синхронизации добавлена для iOS');
+}
+
 // Initialize Application
 function initApp() {
     console.log('🚀 Инициализация приложения...');
@@ -2816,11 +2952,28 @@ function initApp() {
     // Проверяем возможности устройства
     const deviceInfo = checkDeviceCapabilities();
     
+    // Специальная обработка для iOS
+    if (deviceInfo.isIOS) {
+        console.log('🍎 iOS устройство обнаружено - применяем специальные настройки');
+        handleIOSInitialization();
+    }
+    
     // Сначала загружаем базовое состояние из localStorage
     loadLocalState();
     
     // ПРИНУДИТЕЛЬНО сбрасываем верификацию при каждом запуске
     appState.isVerified = false;
+    
+    // Для iOS - принудительная синхронизация с Firebase
+    if (deviceInfo.isIOS) {
+        console.log('🍎 Принудительная синхронизация с Firebase для iOS...');
+        setTimeout(() => {
+            syncWithFirebase();
+        }, 2000);
+        
+        // Добавляем кнопку синхронизации для iOS
+        addIOSSyncButton();
+    }
     console.log('🔒 Сброс верификации при запуске приложения');
     
     // Проверяем, есть ли сохраненный пользователь

@@ -712,11 +712,17 @@ function showNotification(message, type = "success") {
         "notificationMessage",
     );
 
-    messageEl.textContent = message;
-    notification.className = `notification ${type} show`;
+    if (messageEl) {
+        messageEl.textContent = message;
+    }
+    if (notification) {
+        notification.className = `notification ${type} show`;
+    }
 
     safeSetTimeout(() => {
-        notification.classList.remove("show");
+        if (notification) {
+            notification.classList.remove("show");
+        }
     }, 3000);
 }
 
@@ -885,8 +891,11 @@ function updateProgressDisplay() {
     const xpNeeded = getXPRequiredForLevel(progress.level);
     const xpRemaining = Math.max(0, xpNeeded - progress.currentLevelXP);
     const levelProgress = calculateXPProgress(progress.currentLevelXP, xpNeeded);
-    document.getElementById("levelProgress").style.width = `${levelProgress}%`;
-    document.getElementById("xpProgress").textContent = xpNeeded === 0 ? 'Максимальный уровень' : `${xpRemaining} XP`;
+    const levelProgressEl = document.getElementById("levelProgress");
+    const xpProgressEl = document.getElementById("xpProgress");
+    
+    if (levelProgressEl) levelProgressEl.style.width = `${levelProgress}%`;
+    if (xpProgressEl) xpProgressEl.textContent = xpNeeded === 0 ? 'Максимальный уровень' : `${xpRemaining} XP`;
 
     // Update star bank and earned stars for the current week
     updateWeeklyStars();
@@ -1011,9 +1020,13 @@ function updateLearningTimeDisplay() {
     console.log('   - Среднее время по дням недели:', timeData.weeklyTime.map(t => formatTime(t)));
     
     // Обновляем основные статистики
-    document.getElementById('totalLearningTime').textContent = formatTime(timeData.totalTime);
-    document.getElementById('weeklyAvgTime').textContent = formatTime(timeData.weeklyAverage);
-    document.getElementById('dailyAvgTime').textContent = formatTime(timeData.dailyAverage);
+    const totalLearningTimeEl = document.getElementById('totalLearningTime');
+    const weeklyAvgTimeEl = document.getElementById('weeklyAvgTime');
+    const dailyAvgTimeEl = document.getElementById('dailyAvgTime');
+    
+    if (totalLearningTimeEl) totalLearningTimeEl.textContent = formatTime(timeData.totalTime);
+    if (weeklyAvgTimeEl) weeklyAvgTimeEl.textContent = formatTime(timeData.weeklyAverage);
+    if (dailyAvgTimeEl) dailyAvgTimeEl.textContent = formatTime(timeData.dailyAverage);
     
     // Обновляем круговую диаграмму
     updateWeeklyTimeChart(timeData.weeklyTime);
@@ -2106,8 +2119,10 @@ function confirmTaskCompletion(taskId) {
 // Function to execute actual task completion
 function executeTaskCompletion(task, customXP, customTime, completionDate = new Date()) {
     // Animate task completion
-    const taskElement = document.querySelector(`[onclick*="completeTask(event, ${task.id})"]`).closest('.task-item');
-    taskElement.classList.add("task-completed");
+    const taskElement = document.querySelector(`[onclick*="completeTask(event, ${task.id})"]`)?.closest('.task-item');
+    if (taskElement) {
+        taskElement.classList.add("task-completed");
+    }
 
     safeSetTimeout(() => {
         // Log activity with custom values and date first
@@ -2973,8 +2988,8 @@ async function loadDataFromFirebaseFirst() {
     
     try {
         // Сначала пытаемся загрузить из Firebase
-        const docRef = doc(db, 'app-data', 'main');
-        const docSnap = await getDoc(docRef);
+        const docRef = db.collection('app-data').doc('main');
+        const docSnap = await docRef.get();
         
         if (docSnap.exists()) {
             const firebaseData = docSnap.data();
@@ -5099,19 +5114,45 @@ function deleteReward(rewardId) {
 
 // Исправление для iPhone: переустанавливаем обработчики событий для Банка достижений
 if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-    const achievementItems = container.querySelectorAll('.achievement-bank-item');
-    achievementItems.forEach(item => {
-        item.style.position = 'relative';
-        item.style.zIndex = '1';
-        item.style.pointerEvents = 'auto';
-        
-        const buttons = item.querySelectorAll('button');
-        buttons.forEach(btn => {
-            btn.style.position = 'relative';
-            btn.style.zIndex = '2';
-            btn.style.pointerEvents = 'auto';
+    // Ждем загрузки DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('achievementsBankContent');
+            if (container) {
+                const achievementItems = container.querySelectorAll('.achievement-bank-item');
+                achievementItems.forEach(item => {
+                    item.style.position = 'relative';
+                    item.style.zIndex = '1';
+                    item.style.pointerEvents = 'auto';
+                    
+                    const buttons = item.querySelectorAll('button');
+                    buttons.forEach(btn => {
+                        btn.style.position = 'relative';
+                        btn.style.zIndex = '2';
+                        btn.style.pointerEvents = 'auto';
+                    });
+                });
+            }
         });
-    });
+    } else {
+        // DOM уже загружен
+        const container = document.getElementById('achievementsBankContent');
+        if (container) {
+            const achievementItems = container.querySelectorAll('.achievement-bank-item');
+            achievementItems.forEach(item => {
+                item.style.position = 'relative';
+                item.style.zIndex = '1';
+                item.style.pointerEvents = 'auto';
+                
+                const buttons = item.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    btn.style.position = 'relative';
+                    btn.style.zIndex = '2';
+                    btn.style.pointerEvents = 'auto';
+                });
+            });
+        }
+    }
 }
 
 function updateRewardsBank() {

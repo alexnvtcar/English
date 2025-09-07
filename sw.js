@@ -140,7 +140,16 @@ async function staleWhileRevalidate(request) {
   
   const fetchPromise = fetch(request).then((networkResponse) => {
     if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
+      // Проверяем, что request поддерживает кэширование
+      if (request.url.startsWith('http://') || request.url.startsWith('https://')) {
+        try {
+          cache.put(request, networkResponse.clone()).catch(err => {
+            console.log('Cache put failed:', err);
+          });
+        } catch (error) {
+          console.log('Cache put error:', error);
+        }
+      }
     }
     return networkResponse;
   }).catch(() => {

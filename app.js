@@ -710,6 +710,11 @@ function applyRolePermissions() {
     setTimeout(() => {
         fixIOSTouchEvents();
     }, 100);
+    
+    // Дополнительная очистка невидимых слоев после рендеринга
+    setTimeout(() => {
+        clearInvisibleLayers();
+    }, 200);
 }
 
 function showNotification(message, type = "success") {
@@ -734,7 +739,7 @@ function showNotification(message, type = "success") {
 
     // Уменьшаем время показа для iOS, чтобы не блокировать интерфейс
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const displayTime = isIOS ? 2000 : 3000; // 2 секунды для iOS, 3 для остальных
+    const displayTime = isIOS ? 1000 : 3000; // 1 секунда для iOS, 3 для остальных
 
     safeSetTimeout(() => {
         if (notification) {
@@ -3384,6 +3389,11 @@ function initApp() {
     setTimeout(() => {
         fixIOSTouchEvents();
     }, 1000);
+    
+    // Дополнительная очистка невидимых слоев для iOS
+    setTimeout(() => {
+        clearInvisibleLayers();
+    }, 2000);
 }
 
 // Delete Task Function
@@ -9967,12 +9977,58 @@ function diagnoseIOSSync() {
     showNotification('Диагностика iOS завершена - проверьте консоль', 'info');
 }
 
+// Функция для очистки невидимых слоев на iOS
+function clearInvisibleLayers() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (!isIOS) return;
+    
+    console.log('🍎 Очищаем невидимые слои на iOS...');
+    
+    // Удаляем все скрытые модальные уведомления
+    const hiddenNotifications = document.querySelectorAll('.popup-notification:not(.show)');
+    hiddenNotifications.forEach(notification => {
+        notification.style.display = 'none';
+        notification.style.pointerEvents = 'none';
+        notification.style.touchAction = 'none';
+    });
+    
+    // Удаляем все скрытые модальные окна
+    const hiddenModals = document.querySelectorAll('.modal:not([style*="display: block"])');
+    hiddenModals.forEach(modal => {
+        modal.style.display = 'none';
+        modal.style.pointerEvents = 'none';
+    });
+    
+    // Очищаем все элементы с opacity: 0
+    const invisibleElements = document.querySelectorAll('[style*="opacity: 0"], [style*="opacity:0"]');
+    invisibleElements.forEach(element => {
+        if (element.style.position === 'fixed' || element.style.position === 'absolute') {
+            element.style.display = 'none';
+            element.style.pointerEvents = 'none';
+        }
+    });
+    
+    // Принудительно скрываем все уведомления
+    const allNotifications = document.querySelectorAll('.notification, .popup-notification');
+    allNotifications.forEach(notification => {
+        notification.classList.remove('show');
+        notification.style.display = 'none';
+        notification.style.pointerEvents = 'none';
+        notification.style.touchAction = 'none';
+    });
+    
+    console.log('✅ Невидимые слои очищены');
+}
+
 // Функция для исправления touch events на iOS
 function fixIOSTouchEvents() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     if (!isIOS) return;
     
     console.log('🍎 Исправляем touch events для iOS...');
+    
+    // Сначала очищаем невидимые слои
+    clearInvisibleLayers();
     
     // Исправляем все интерактивные элементы
     const interactiveElements = document.querySelectorAll(
@@ -10067,6 +10123,7 @@ if (typeof window !== 'undefined') {
     window.diagnoseIOSSync = diagnoseIOSSync;
     window.showTechDiagnosticsBlock = showTechDiagnosticsBlock;
     window.fixIOSTouchEvents = fixIOSTouchEvents;
+    window.clearInvisibleLayers = clearInvisibleLayers;
     console.log('🧪 Test functions registered globally');
 }
         

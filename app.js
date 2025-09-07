@@ -6859,7 +6859,6 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h3>💾 Общие данные сохранены в Firebase</h3>
-                            <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
                         </div>
                         <div class="modal-body">
                             <div class="save-details">
@@ -6889,7 +6888,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer">
+                        <div class="modal-footer" style="text-align: center;">
                             <button class="btn btn-primary" onclick="this.closest('.modal').remove()">OK</button>
                         </div>
                     </div>
@@ -8044,6 +8043,39 @@
                 }
                 
                 updatePWAInstallButton();
+            }
+
+            // Функция выхода из приложения
+            async function exitApp() {
+                console.log('🚪 Выход из приложения...');
+                
+                // Показываем уведомление о сохранении
+                showNotification('Сохранение данных перед выходом...', 'info');
+                
+                try {
+                    // Сохраняем данные в Firebase
+                    const saveResult = await saveDataToFirebase();
+                    
+                    if (saveResult) {
+                        showNotification('Данные сохранены. Выход из приложения...', 'success');
+                        
+                        // Ждем немного, чтобы пользователь увидел уведомление
+                        setTimeout(() => {
+                            // Закрываем приложение
+                            if (window.close) {
+                                window.close();
+                            } else {
+                                // Если window.close не работает, показываем сообщение
+                                alert('Приложение готово к закрытию. Закройте вкладку вручную.');
+                            }
+                        }, 1500);
+                    } else {
+                        showNotification('Ошибка сохранения. Выход отменен.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Ошибка при выходе:', error);
+                    showNotification('Ошибка сохранения. Выход отменен.', 'error');
+                }
             }
 
             // Initialize the app when DOM is loaded

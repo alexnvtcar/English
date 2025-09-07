@@ -3584,7 +3584,7 @@
                     left: 18px;
                 }
                 
-                .settings-btn, .save-btn, .install-pwa-btn {
+                .settings-btn, .save-btn, .install-pwa-btn, .exit-btn {
                     width: 45px;
                     height: 45px;
                     font-size: 1.1rem;
@@ -3597,7 +3597,7 @@
                     left: 15px;
                 }
                 
-                .settings-btn, .save-btn, .install-pwa-btn {
+                .settings-btn, .save-btn, .install-pwa-btn, .exit-btn {
                     width: 42px;
                     height: 42px;
                     font-size: 1rem;
@@ -3610,7 +3610,7 @@
                     left: 10px;
                 }
                 
-                .settings-btn, .save-btn, .install-pwa-btn {
+                .settings-btn, .save-btn, .install-pwa-btn, .exit-btn {
                     width: 40px;
                     height: 40px;
                     font-size: 0.9rem;
@@ -3623,14 +3623,14 @@
                     left: 8px;
                 }
                 
-                .settings-btn, .save-btn, .install-pwa-btn {
+                .settings-btn, .save-btn, .install-pwa-btn, .exit-btn {
                     width: 36px;
                     height: 36px;
                     font-size: 0.8rem;
                 }
             }
 
-            .settings-btn, .save-btn, .install-pwa-btn {
+            .settings-btn, .save-btn, .install-pwa-btn, .exit-btn {
                 width: 50px;
                 height: 50px;
                 border: none;
@@ -3701,6 +3701,39 @@
 
             .save-btn .save-text {
                 display: none;
+            }
+
+            /* Exit Button Styles */
+            .exit-btn {
+                background: linear-gradient(135deg, #f59e0b, #f97316);
+                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+                width: 50px;
+                height: 50px;
+                padding: 0;
+                border-radius: 50%;
+                gap: 0;
+                margin-top: 8px;
+            }
+
+            .exit-btn:hover {
+                background: linear-gradient(135deg, #d97706, #ea580c);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+            }
+
+            .exit-btn:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+            }
+
+            .exit-btn .exit-icon {
+                font-size: 1.2rem;
+                animation: exitPulse 2s infinite;
+            }
+
+            @keyframes exitPulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
             }
 
             /* Save Button Loading State */

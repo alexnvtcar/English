@@ -5555,13 +5555,34 @@ function selectAccount(role) {
     console.log(`✅ Учетная запись изменена: ${previousUserName} (${previousRole}) → ${appState.userName} (${appState.role})`);
     
     // Закрываем модальное окно выбора учетной записи
-    document.getElementById('accountModal').classList.remove('show');
-    
-    // Убираем затемнение и показываем основной контент
+    const accountModal = document.getElementById('accountModal');
     const overlay = document.getElementById('modalOverlay');
     const container = document.querySelector('.container');
-    if (overlay) overlay.classList.remove('show');
-    if (container) container.classList.remove('hidden');
+    
+    // Для iOS: принудительно скрываем модальное окно
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+        console.log('🍎 iOS: Принудительно скрываем модальное окно выбора учетной записи');
+        
+        if (accountModal) {
+            accountModal.style.display = 'none';
+            accountModal.classList.remove('show');
+        }
+        
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('show');
+        }
+        
+        if (container) {
+            container.classList.remove('hidden');
+        }
+    } else {
+        // Обычное поведение для не-iOS
+        if (accountModal) accountModal.classList.remove('show');
+        if (overlay) overlay.classList.remove('show');
+        if (container) container.classList.remove('hidden');
+    }
     
     // Показываем верификацию для входа
     appState.isVerified = false;
@@ -5600,13 +5621,52 @@ function selectAccount(role) {
 function showChangeAccountModal() {
     // Сбрасываем статус верификации при смене учетной записи
     appState.isVerified = false;
-    document.getElementById('accountModal').classList.add('show');
     
-    // Скрываем основной контент и показываем затемнение
+    const accountModal = document.getElementById('accountModal');
     const overlay = document.getElementById('modalOverlay');
     const container = document.querySelector('.container');
-    if (overlay) overlay.classList.add('show');
-    if (container) container.classList.add('hidden');
+    
+    // Для iOS: принудительно устанавливаем стили
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+        console.log('🍎 iOS: Принудительно показываем модальное окно выбора учетной записи');
+        
+        // Принудительно показываем модальное окно
+        if (accountModal) {
+            accountModal.style.display = 'flex';
+            accountModal.style.position = 'fixed';
+            accountModal.style.top = '0';
+            accountModal.style.left = '0';
+            accountModal.style.width = '100%';
+            accountModal.style.height = '100%';
+            accountModal.style.zIndex = '1100';
+            accountModal.style.alignItems = 'center';
+            accountModal.style.justifyContent = 'center';
+            accountModal.classList.add('show');
+        }
+        
+        // Принудительно показываем overlay
+        if (overlay) {
+            overlay.style.display = 'block';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.zIndex = '1000';
+            overlay.classList.add('show');
+        }
+        
+        // Скрываем основной контент
+        if (container) {
+            container.classList.add('hidden');
+        }
+    } else {
+        // Обычное поведение для не-iOS
+        if (accountModal) accountModal.classList.add('show');
+        if (overlay) overlay.classList.add('show');
+        if (container) container.classList.add('hidden');
+    }
     
     console.log('🔄 Показываем смену учетной записи, пересчитываем все показатели...');
     

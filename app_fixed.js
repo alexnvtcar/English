@@ -8052,6 +8052,7 @@ if (document.readyState === 'loading') {
 } else {
     initApp();
 }
+}
 
         
 // Функция для восстановления состояния блоков настроек

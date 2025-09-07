@@ -7191,6 +7191,38 @@
                 background: rgba(0, 0, 0, 0.7) !important;
             }
             
+            /* Улучшаем кнопки в модальном окне выбора учетной записи */
+            #accountModal .btn {
+                min-height: 60px !important;
+                font-size: 1.1rem !important;
+                font-weight: 600 !important;
+                padding: 20px !important;
+                margin: 10px 0 !important;
+                border-radius: 12px !important;
+                transition: all 0.2s ease !important;
+                -webkit-tap-highlight-color: transparent !important;
+                -webkit-touch-callout: none !important;
+                -webkit-user-select: none !important;
+                user-select: none !important;
+                touch-action: manipulation !important;
+            }
+            
+            #accountModal .btn:active {
+                transform: scale(0.95) !important;
+                transition: transform 0.1s ease !important;
+            }
+            
+            /* Улучшаем отзывчивость модального окна */
+            #accountModal {
+                -webkit-overflow-scrolling: touch !important;
+                touch-action: manipulation !important;
+            }
+            
+            #accountModal .modal-content {
+                -webkit-overflow-scrolling: touch !important;
+                touch-action: manipulation !important;
+            }
+            
             /* Улучшаем отзывчивость интерфейса */
             .task-item:active, .reward-item:active, .calendar-day:active, .btn:active, button:active {
                 transform: scale(0.98);

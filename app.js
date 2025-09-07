@@ -3224,8 +3224,8 @@ function initApp() {
             console.log('❌ PIN-коды не загружены из Firebase');
             showNotification('PIN-коды не загружены. Проверьте интернет-соединение.', 'error');
             
-            // Показываем выбор учетной записи, если PIN-коды не загружены
-            showAccountSelection();
+            // Не показываем выбор учетной записи здесь - будет показан в конце initApp
+            console.log('⏳ Ожидаем завершения инициализации для показа выбора учетной записи');
             return;
         }
         
@@ -3269,13 +3269,13 @@ function initApp() {
             
             showVerificationModal();
         } else {
-            // Если PIN-кода нет, показываем выбор учетной записи
-            console.log('👤 PIN-код не найден, показываем выбор учетной записи');
-            
-            // Автоматическое сохранение отключено при показе выбора учетной записи
-            // saveDataToFirebase();
-            
-            showAccountSelection();
+        // Если PIN-кода нет, не показываем выбор учетной записи здесь
+        console.log('👤 PIN-код не найден, ожидаем завершения инициализации');
+        
+        // Автоматическое сохранение отключено при показе выбора учетной записи
+        // saveDataToFirebase();
+        
+        // showAccountSelection(); // Убираем дублирование - будет вызвано в конце initApp
         }
     };
 
@@ -3396,9 +3396,14 @@ function initApp() {
     }, 2000);
     
     // Показываем выбор учетной записи после завершения инициализации
+    // Увеличиваем задержку для iPhone, чтобы интерфейс успел загрузиться
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const delay = isIOS ? 2000 : 1000; // 2 секунды для iOS, 1 для остальных
+    
     setTimeout(() => {
+        console.log('👤 Показываем выбор учетной записи с задержкой:', delay + 'мс');
         showAccountSelection();
-    }, 100);
+    }, delay);
 }
 
 // Delete Task Function
@@ -5581,9 +5586,17 @@ function selectAccount(role) {
         container.classList.remove('hidden');
     }
     
-    // Показываем верификацию для входа
+    // Показываем верификацию для входа с задержкой
     appState.isVerified = false;
-    showVerificationModal();
+    
+    // Добавляем задержку для iPhone, чтобы пользователь успел увидеть закрытие модального окна
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const verificationDelay = isIOS ? 1500 : 500; // 1.5 секунды для iOS, 0.5 для остальных
+    
+    setTimeout(() => {
+        console.log('🔐 Показываем верификацию с задержкой:', verificationDelay + 'мс');
+        showVerificationModal();
+    }, verificationDelay);
     
     console.log('🔄 Учетная запись изменена, пересчитываем все показатели...');
     
@@ -5625,19 +5638,58 @@ function showChangeAccountModal() {
     
     console.log('👤 Показываем модальное окно выбора учетной записи');
     
-    // Показываем модальное окно
-    if (accountModal) {
-        accountModal.classList.add('show');
-    }
+    // Для iOS: принудительно устанавливаем стили
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
-    // Показываем полупрозрачный слой
-    if (overlay) {
-        overlay.classList.add('show');
-    }
-    
-    // Скрываем основной контент
-    if (container) {
-        container.classList.add('hidden');
+    if (isIOS) {
+        console.log('🍎 iOS: Принудительно показываем модальное окно');
+        
+        // Очищаем невидимые слои
+        clearInvisibleLayers();
+        
+        // Принудительно показываем модальное окно
+        if (accountModal) {
+            accountModal.style.display = 'flex';
+            accountModal.style.position = 'fixed';
+            accountModal.style.top = '0';
+            accountModal.style.left = '0';
+            accountModal.style.width = '100%';
+            accountModal.style.height = '100%';
+            accountModal.style.zIndex = '1100';
+            accountModal.style.alignItems = 'center';
+            accountModal.style.justifyContent = 'center';
+            accountModal.classList.add('show');
+        }
+        
+        // Принудительно показываем overlay
+        if (overlay) {
+            overlay.style.display = 'block';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.zIndex = '1000';
+            overlay.classList.add('show');
+        }
+        
+        // Скрываем основной контент
+        if (container) {
+            container.classList.add('hidden');
+        }
+    } else {
+        // Обычное поведение для не-iOS
+        if (accountModal) {
+            accountModal.classList.add('show');
+        }
+        
+        if (overlay) {
+            overlay.classList.add('show');
+        }
+        
+        if (container) {
+            container.classList.add('hidden');
+        }
     }
     
     console.log('🔄 Показываем смену учетной записи, пересчитываем все показатели...');
@@ -7799,8 +7851,14 @@ function showAccountSelection() {
     // 3. Проверяем, что все показатели обновлены
     console.log('✅ Выбор учетной записи показан, все показатели пересчитаны');
     
-    // 4. ПОКАЗЫВАЕМ МОДАЛЬНОЕ ОКНО ВЫБОРА УЧЕТНОЙ ЗАПИСИ
-    showChangeAccountModal();
+    // 4. ПОКАЗЫВАЕМ МОДАЛЬНОЕ ОКНО ВЫБОРА УЧЕТНОЙ ЗАПИСИ с задержкой
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const modalDelay = isIOS ? 500 : 200; // 0.5 секунды для iOS, 0.2 для остальных
+    
+    setTimeout(() => {
+        console.log('👤 Показываем модальное окно выбора учетной записи с задержкой:', modalDelay + 'мс');
+        showChangeAccountModal();
+    }, modalDelay);
     
                             // Применяем роли для правильного отображения блоков настроек
             applyRolePermissions();
@@ -8516,8 +8574,8 @@ window.showVerificationAfterSync = () => {
         console.log('❌ PIN-коды не загружены из Firebase');
         showNotification('PIN-коды не загружены. Проверьте интернет-соединение.', 'error');
         
-        // Показываем выбор учетной записи, если PIN-коды не загружены
-        showAccountSelection();
+        // Не показываем выбор учетной записи здесь - будет показан в конце initApp
+        console.log('⏳ Ожидаем завершения инициализации для показа выбора учетной записи');
         return;
     }
     
@@ -8552,9 +8610,9 @@ window.showVerificationAfterSync = () => {
     
     showVerificationModal();
     } else {
-        // Если PIN-кода нет, показываем выбор учетной записи
-        console.log('👤 PIN-код не найден, показываем выбор учетной записи');
-        showAccountSelection();
+        // Если PIN-кода нет, не показываем выбор учетной записи здесь
+        console.log('👤 PIN-код не найден, ожидаем завершения инициализации');
+        // showAccountSelection(); // Убираем дублирование - будет вызвано в конце initApp
     }
 };
 
@@ -10108,6 +10166,55 @@ function fixIOSTouchEvents() {
     console.log('✅ iOS touch events исправлены');
 }
 
+// Функция для принудительного показа модального окна выбора учетной записи на iOS
+function forceShowAccountSelection() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (!isIOS) {
+        console.log('⚠️ Функция предназначена только для iOS устройств');
+        return;
+    }
+    
+    console.log('🍎 iOS: Принудительно показываем выбор учетной записи');
+    
+    // Очищаем все невидимые слои
+    clearInvisibleLayers();
+    
+    // Принудительно показываем модальное окно
+    const accountModal = document.getElementById('accountModal');
+    const overlay = document.getElementById('modalOverlay');
+    const container = document.querySelector('.container');
+    
+    if (accountModal) {
+        accountModal.style.display = 'flex';
+        accountModal.style.position = 'fixed';
+        accountModal.style.top = '0';
+        accountModal.style.left = '0';
+        accountModal.style.width = '100%';
+        accountModal.style.height = '100%';
+        accountModal.style.zIndex = '1100';
+        accountModal.style.alignItems = 'center';
+        accountModal.style.justifyContent = 'center';
+        accountModal.classList.add('show');
+    }
+    
+    if (overlay) {
+        overlay.style.display = 'block';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.zIndex = '1000';
+        overlay.classList.add('show');
+    }
+    
+    if (container) {
+        container.classList.add('hidden');
+    }
+    
+    console.log('✅ iOS: Модальное окно выбора учетной записи принудительно показано');
+}
+
 // Функция для переключения видимости блока технической диагностики
 function showTechDiagnosticsBlock() {
     console.log('🔧 Переключение блока технической диагностики...');
@@ -10159,6 +10266,7 @@ if (typeof window !== 'undefined') {
     window.showTechDiagnosticsBlock = showTechDiagnosticsBlock;
     window.fixIOSTouchEvents = fixIOSTouchEvents;
     window.clearInvisibleLayers = clearInvisibleLayers;
+    window.forceShowAccountSelection = forceShowAccountSelection;
     console.log('🧪 Test functions registered globally');
 }
         

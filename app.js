@@ -739,7 +739,7 @@ function showNotification(message, type = "success") {
 
     // Уменьшаем время показа для iOS, чтобы не блокировать интерфейс
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const displayTime = isIOS ? 1000 : 3000; // 1 секунда для iOS, 3 для остальных
+    const displayTime = isIOS ? 2000 : 3000; // 2 секунды для iOS, 3 для остальных
 
     safeSetTimeout(() => {
         if (notification) {

@@ -1985,6 +1985,8 @@
                 gap: 12px;
                 min-width: 300px;
                 box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+                pointer-events: none; /* Не блокируем touch events */
+                touch-action: none; /* Отключаем touch действия для уведомлений */
             }
 
             .notification.show {
@@ -2783,6 +2785,34 @@
                 /* iPhone 12/13/14 Pro Max, iPhone 15 Pro Max */
                 .container {
                     padding: 16px;
+                }
+                
+                /* Исправляем проблемы с touch events на iOS */
+                .task-item, .reward-item, .calendar-day, .btn, button, .settings-item {
+                    -webkit-tap-highlight-color: transparent;
+                    -webkit-touch-callout: none;
+                    -webkit-user-select: none;
+                    user-select: none;
+                    touch-action: manipulation;
+                }
+                
+                /* Улучшаем отзывчивость кнопок */
+                .task-item:active, .reward-item:active, .calendar-day:active {
+                    transform: scale(0.98);
+                    transition: transform 0.1s ease;
+                }
+                
+                /* Исправляем проблемы с календарем */
+                .calendar-grid {
+                    touch-action: manipulation;
+                    -webkit-overflow-scrolling: touch;
+                }
+                
+                .calendar-day {
+                    min-height: 44px; /* Минимальный размер для touch */
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
                 
                 .main-header h1 {
@@ -6808,6 +6838,7 @@
                 gap: 12px;
                 max-width: 400px;
                 pointer-events: none;
+                touch-action: none; /* Отключаем touch действия для контейнера уведомлений */
             }
 
             /* Individual Notification */
@@ -6818,7 +6849,8 @@
                 padding: 20px;
                 box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
                 backdrop-filter: blur(10px);
-                pointer-events: auto;
+                pointer-events: none; /* Не блокируем touch events */
+                touch-action: none; /* Отключаем touch действия для popup уведомлений */
                 position: relative;
                 overflow: hidden;
                 transform: translateX(100%);
@@ -7095,12 +7127,66 @@
             padding: 30px !important;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
             backdrop-filter: blur(20px) !important;
-            pointer-events: auto !important;
+            pointer-events: none !important; /* Не блокируем touch events */
+            touch-action: none !important; /* Отключаем touch действия для модальных уведомлений */
             max-width: 500px !important;
             min-width: 400px !important;
             opacity: 0 !important;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+
+        /* iOS Touch Events Fixes */
+        @supports (-webkit-touch-callout: none) {
+            /* Стили только для iOS */
+            .task-item, .reward-item, .calendar-day, .btn, button, .settings-item {
+                -webkit-tap-highlight-color: transparent;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                user-select: none;
+                touch-action: manipulation;
+            }
+            
+            /* Улучшаем отзывчивость интерфейса */
+            .task-item:active, .reward-item:active, .calendar-day:active, .btn:active, button:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+            
+            /* Исправляем проблемы с календарем на iOS */
+            .calendar-grid {
+                touch-action: manipulation;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .calendar-day {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+            }
+            
+            /* Исправляем проблемы с модальными окнами */
+            .modal {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .modal-content {
+                touch-action: manipulation;
+            }
+            
+            /* Улучшаем работу с настройками */
+            .settings-panel {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .settings-item {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                padding: 12px 16px;
+            }
         }
 
         /* PWA стили */

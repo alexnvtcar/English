@@ -705,6 +705,11 @@ function applyRolePermissions() {
     
     // Обновляем отображение заданий с учетом роли
     renderTasks();
+    
+    // Исправляем touch events для iOS после рендеринга
+    setTimeout(() => {
+        fixIOSTouchEvents();
+    }, 100);
 }
 
 function showNotification(message, type = "success") {
@@ -718,13 +723,32 @@ function showNotification(message, type = "success") {
     }
     if (notification) {
         notification.className = `notification ${type} show`;
+        
+        // Для iOS: принудительно обновляем стили
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+            notification.style.pointerEvents = 'none';
+            notification.style.touchAction = 'none';
+            notification.style.zIndex = '1400';
+        }
     }
+
+    // Уменьшаем время показа для iOS, чтобы не блокировать интерфейс
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const displayTime = isIOS ? 2000 : 3000; // 2 секунды для iOS, 3 для остальных
 
     safeSetTimeout(() => {
         if (notification) {
             notification.classList.remove("show");
+            
+            // Дополнительная очистка для iOS
+            if (isIOS) {
+                setTimeout(() => {
+                    notification.style.pointerEvents = 'none';
+                    notification.style.touchAction = 'none';
+                }, 100);
+            }
         }
-    }, 3000);
+    }, displayTime);
 }
 
 
@@ -3355,6 +3379,11 @@ function initApp() {
     setTimeout(() => {
         showNotification('🔧 Доступны новые функции тестирования в настройках!', 'info');
     }, 3000);
+    
+    // Исправляем touch events для iOS
+    setTimeout(() => {
+        fixIOSTouchEvents();
+    }, 1000);
 }
 
 // Delete Task Function
@@ -9938,6 +9967,56 @@ function diagnoseIOSSync() {
     showNotification('Диагностика iOS завершена - проверьте консоль', 'info');
 }
 
+// Функция для исправления touch events на iOS
+function fixIOSTouchEvents() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (!isIOS) return;
+    
+    console.log('🍎 Исправляем touch events для iOS...');
+    
+    // Исправляем все интерактивные элементы
+    const interactiveElements = document.querySelectorAll(
+        '.task-item, .reward-item, .calendar-day, .btn, button, .settings-item, .modal-content'
+    );
+    
+    interactiveElements.forEach(element => {
+        // Убираем стандартные iOS touch эффекты
+        element.style.webkitTapHighlightColor = 'transparent';
+        element.style.webkitTouchCallout = 'none';
+        element.style.webkitUserSelect = 'none';
+        element.style.userSelect = 'none';
+        element.style.touchAction = 'manipulation';
+        
+        // Добавляем обработчики для лучшей отзывчивости
+        element.addEventListener('touchstart', function(e) {
+            this.style.transform = 'scale(0.98)';
+        }, { passive: true });
+        
+        element.addEventListener('touchend', function(e) {
+            this.style.transform = 'scale(1)';
+        }, { passive: true });
+        
+        element.addEventListener('touchcancel', function(e) {
+            this.style.transform = 'scale(1)';
+        }, { passive: true });
+    });
+    
+    // Исправляем календарь
+    const calendarGrid = document.querySelector('.calendar-grid');
+    if (calendarGrid) {
+        calendarGrid.style.webkitOverflowScrolling = 'touch';
+        calendarGrid.style.touchAction = 'manipulation';
+    }
+    
+    // Исправляем модальные окна
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        modal.style.webkitOverflowScrolling = 'touch';
+    });
+    
+    console.log('✅ iOS touch events исправлены');
+}
+
 // Функция для переключения видимости блока технической диагностики
 function showTechDiagnosticsBlock() {
     console.log('🔧 Переключение блока технической диагностики...');
@@ -9987,6 +10066,7 @@ if (typeof window !== 'undefined') {
     window.forceIOSSync = forceIOSSync;
     window.diagnoseIOSSync = diagnoseIOSSync;
     window.showTechDiagnosticsBlock = showTechDiagnosticsBlock;
+    window.fixIOSTouchEvents = fixIOSTouchEvents;
     console.log('🧪 Test functions registered globally');
 }
         

@@ -734,8 +734,8 @@ function applyRolePermissions() {
     
     // Управление видимостью блоков настроек
     const blocksToHide = [
-        // Блок технической диагностики показываем всем пользователям
-        // { element: document.getElementById('techDiagnosticsBlock'), divider: document.getElementById('dividerBeforeTech') },
+        // Блок технической диагностики скрываем для Михаила (viewer)
+        { element: document.getElementById('techDiagnosticsBlock'), divider: document.getElementById('dividerBeforeTech') },
         { element: document.getElementById('firebaseOperationsBlock'), divider: document.getElementById('dividerBeforeFirebase') },
         { element: document.getElementById('dangerousOperationsBlock'), divider: document.getElementById('dividerBeforeDanger') },
         { element: document.getElementById('backupManagementBlock'), divider: document.getElementById('dividerBeforeBackups') }

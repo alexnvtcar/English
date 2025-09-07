@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Тест прав доступа для Михаила</title>
+    
+    <!-- iOS PWA мета-теги -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Permissions Test">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .permission-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .permission-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .permission-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+        }
+        
+        .permission-text h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+        
+        .permission-text p {
+            margin: 0;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .status-allowed {
+            color: #10b981;
+        }
+        
+        .status-denied {
+            color: #ef4444;
+        }
+        
+        .test-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .test-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .warning-box {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .warning-box h3 {
+            margin-top: 0;
+            color: #fca5a5;
+        }
+        
+        .info-box {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-box h3 {
+            margin-top: 0;
+            color: #93c5fd;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .permission-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Тест прав доступа</h1>
+            <p>Проверка ограничений для пользователя Михаил</p>
+        </div>
+        
+        <div class="warning-box">
+            <h3>⚠️ ВАЖНОЕ ИЗМЕНЕНИЕ</h3>
+            <p>У пользователя <strong>Михаил</strong> теперь <strong>ОТКЛЮЧЕН</strong> доступ к блоку <strong>Техническая диагностика</strong> в настройках приложения.</p>
+        </div>
+        
+        <div class="info-box">
+            <h3>ℹ️ Информация о ролях</h3>
+            <p><strong>Михаил</strong> имеет роль <code>viewer</code> - может просматривать данные, но не может изменять настройки и использовать технические функции.</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>📋 Права доступа для Михаила</h2>
+            <div class="permission-list">
+                <div class="permission-item">
+                    <div class="permission-icon">✅</div>
+                    <div class="permission-text">
+                        <h4 class="status-allowed">Просмотр заданий</h4>
+                        <p>Может видеть все задания и их прогресс</p>
+                    </div>
+                </div>
+                
+                <div class="permission-item">
+                    <div class="permission-icon">✅</div>
+                    <div class="permission-text">
+                        <h4 class="status-allowed">Просмотр прогресса</h4>
+                        <p>Может видеть статистику и достижения</p>
+                    </div>
+                </div>
+                
+                <div class="permission-item">
+                    <div class="permission-icon">✅</div>
+                    <div class="permission-text">
+                        <h4 class="status-allowed">Навигация по календарю</h4>
+                        <p>Может переключаться между неделями и месяцами</p>
+                    </div>
+                </div>
+                
+                <div class="permission-item">
+                    <div class="permission-icon">❌</div>
+                    <div class="permission-text">
+                        <h4 class="status-denied">Техническая диагностика</h4>
+                        <p>НЕ может использовать функции диагностики</p>
+                    </div>
+                </div>
+                
+                <div class="permission-item">
+                    <div class="permission-icon">❌</div>
+                    <div class="permission-text">
+                        <h4 class="status-denied">Firebase операции</h4>
+                        <p>НЕ может управлять синхронизацией данных</p>
+                    </div>
+                </div>
+                
+                <div class="permission-item">
+                    <div class="permission-icon">❌</div>
+                    <div class="permission-text">
+                        <h4 class="status-denied">Опасные операции</h4>
+                        <p>НЕ может удалять данные или сбрасывать прогресс</p>
+                    </div>
+                </div>
+                
+                <div class="permission-item">
+                    <div class="permission-icon">❌</div>
+                    <div class="permission-text">
+                        <h4 class="status-denied">Управление бэкапами</h4>
+                        <p>НЕ может создавать или восстанавливать бэкапы</p>
+                    </div>
+                </div>
+                
+                <div class="permission-item">
+                    <div class="permission-icon">❌</div>
+                    <div class="permission-text">
+                        <h4 class="status-denied">Добавление заданий</h4>
+                        <p>НЕ может создавать новые задания</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔧 Что изменилось</h2>
+            <div class="permission-list">
+                <div class="permission-item">
+                    <div class="permission-icon">🔒</div>
+                    <div class="permission-text">
+                        <h4>Блок "Техническая диагностика"</h4>
+                        <p>Теперь скрыт для пользователя Михаил в настройках приложения</p>
+                    </div>
+                </div>
+                
+                <div class="permission-item">
+                    <div class="permission-icon">⚙️</div>
+                    <div class="permission-text">
+                        <h4>Функции диагностики</h4>
+                        <p>Верификация, тесты Firebase, диагностика устройства недоступны</p>
+                    </div>
+                </div>
+                
+                <div class="permission-item">
+                    <div class="permission-icon">🧪</div>
+                    <div class="permission-text">
+                        <h4>Тестовые страницы</h4>
+                        <p>Ссылки на тестовые страницы скрыты из меню</p>
+                    </div>
+                </div>
+                
+                <div class="permission-item">
+                    <div class="permission-icon">🍎</div>
+                    <div class="permission-text">
+                        <h4>iOS функции</h4>
+                        <p>Принудительная синхронизация и диагностика iOS недоступны</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-btn" onclick="testMikhailLogin()">👤 Войти как Михаил</button>
+            <button class="test-btn" onclick="testAdminLogin()">👑 Войти как Админ</button>
+            <button class="test-btn" onclick="openMainApp()">🚀 Открыть приложение</button>
+        </div>
+    </div>
+
+    <script>
+        function testMikhailLogin() {
+            // Симулируем вход как Михаил
+            localStorage.setItem('appState', JSON.stringify({
+                userName: 'Михаил',
+                role: 'viewer',
+                isInitialized: true
+            }));
+            
+            alert('✅ Вход выполнен как Михаил (viewer)\n\nТеперь откройте приложение и проверьте настройки - блок "Техническая диагностика" должен быть скрыт.');
+        }
+        
+        function testAdminLogin() {
+            // Симулируем вход как Админ
+            localStorage.setItem('appState', JSON.stringify({
+                userName: 'Admin',
+                role: 'admin',
+                isInitialized: true
+            }));
+            
+            alert('✅ Вход выполнен как Админ\n\nТеперь откройте приложение и проверьте настройки - все блоки должны быть доступны.');
+        }
+        
+        function openMainApp() {
+            window.location.href = './index.html';
+        }
+        
+        // Автоматическая проверка при загрузке
+        window.addEventListener('load', () => {
+            console.log('🔐 Тест прав доступа загружен');
+            
+            // Проверяем текущее состояние
+            const appState = localStorage.getItem('appState');
+            if (appState) {
+                try {
+                    const state = JSON.parse(appState);
+                    console.log('👤 Текущий пользователь:', state.userName);
+                    console.log('🔑 Роль:', state.role);
+                    
+                    if (state.userName === 'Михаил' && state.role === 'viewer') {
+                        console.log('⚠️ Михаил не должен видеть техническую диагностику');
+                    }
+                } catch (e) {
+                    console.log('❌ Ошибка парсинга appState');
+                }
+            } else {
+                console.log('ℹ️ Пользователь не авторизован');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -2838,6 +2838,12 @@ function handleIOSInitialization() {
             navigator.serviceWorker.register('./sw.js', { scope: './' })
                 .then(function(registration) {
                     console.log('✅ Service Worker зарегистрирован для iOS:', registration);
+                    
+                    // Принудительно обновляем кэш для iOS
+                    if (registration.active) {
+                        registration.active.postMessage({ type: 'CLEAR_CACHE' });
+                        console.log('🍎 iOS: Отправлена команда очистки кэша');
+                    }
                 })
                 .catch(function(error) {
                     console.error('❌ Ошибка регистрации Service Worker для iOS:', error);
@@ -2845,13 +2851,29 @@ function handleIOSInitialization() {
         }, 1000);
     }
     
-    // Принудительно обновляем localStorage
+    // Принудительно очищаем localStorage для iOS
     try {
+        // Очищаем все данные приложения из localStorage
+        const keysToRemove = [
+            'englishLearningData',
+            'current-user',
+            'has-synced-before',
+            'ios_last_update',
+            'app-version',
+            'last-backup-time'
+        ];
+        
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+            console.log('🗑️ iOS: Удален ключ localStorage:', key);
+        });
+        
+        // Устанавливаем флаг, что это iOS
         const currentTime = Date.now();
-        localStorage.setItem('ios_last_update', currentTime.toString());
-        console.log('🔄 Обновлен timestamp для iOS:', currentTime);
+        localStorage.setItem('ios_device', currentTime.toString());
+        console.log('🔄 iOS: localStorage очищен, установлен флаг устройства');
     } catch (error) {
-        console.error('❌ Ошибка обновления localStorage для iOS:', error);
+        console.error('❌ Ошибка очистки localStorage для iOS:', error);
     }
     
     // Принудительно сбрасываем состояние приложения
@@ -2945,6 +2967,71 @@ function addIOSSyncButton() {
     console.log('✅ Кнопка синхронизации добавлена для iOS');
 }
 
+// Загрузка данных с приоритетом Firebase для iOS
+async function loadDataFromFirebaseFirst() {
+    console.log('🍎 iOS: Загрузка данных с приоритетом Firebase...');
+    
+    try {
+        // Сначала пытаемся загрузить из Firebase
+        const docRef = doc(db, 'app-data', 'main');
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            const firebaseData = docSnap.data();
+            console.log('📥 Firebase данные получены для iOS:', firebaseData);
+            
+            // Принудительно обновляем состояние приложения из Firebase
+            if (firebaseData.tasks) {
+                appState.tasks = firebaseData.tasks;
+                console.log('✅ iOS: Задачи загружены из Firebase');
+            }
+            
+            if (firebaseData.achievements) {
+                appState.achievements = firebaseData.achievements;
+                console.log('✅ iOS: Достижения загружены из Firebase');
+            }
+            
+            if (firebaseData.rewards) {
+                appState.rewards = firebaseData.rewards;
+                console.log('✅ iOS: Награды загружены из Firebase');
+            }
+            
+            if (firebaseData.pinCodes) {
+                appState.pinCodes = firebaseData.pinCodes;
+                console.log('✅ iOS: PIN коды загружены из Firebase');
+            }
+            
+            if (firebaseData.progress) {
+                appState.progress = { ...appState.progress, ...firebaseData.progress };
+                console.log('✅ iOS: Прогресс загружен из Firebase');
+            }
+            
+            if (firebaseData.settings) {
+                appState.settings = { ...appState.settings, ...firebaseData.settings };
+                console.log('✅ iOS: Настройки загружены из Firebase');
+            }
+            
+            // Обновляем UI
+            updateUI();
+            console.log('🔄 iOS: UI обновлен из Firebase данных');
+            
+            // Сохраняем данные в localStorage как backup
+            saveLocalState();
+            console.log('💾 iOS: Данные сохранены в localStorage как backup');
+            
+            showNotification('Данные загружены с сервера', 'success');
+        } else {
+            console.log('⚠️ iOS: Firebase данные не найдены, загружаем из localStorage');
+            loadLocalState();
+        }
+    } catch (error) {
+        console.error('❌ iOS: Ошибка загрузки из Firebase:', error);
+        console.log('🔄 iOS: Fallback на localStorage');
+        loadLocalState();
+        showNotification('Ошибка загрузки с сервера, используются локальные данные', 'warning');
+    }
+}
+
 // Initialize Application
 function initApp() {
     console.log('🚀 Инициализация приложения...');
@@ -2958,22 +3045,21 @@ function initApp() {
         handleIOSInitialization();
     }
     
-    // Сначала загружаем базовое состояние из localStorage
-    loadLocalState();
-    
-    // ПРИНУДИТЕЛЬНО сбрасываем верификацию при каждом запуске
-    appState.isVerified = false;
-    
-    // Для iOS - принудительная синхронизация с Firebase
+    // Для iOS - приоритет Firebase над localStorage
     if (deviceInfo.isIOS) {
-        console.log('🍎 Принудительная синхронизация с Firebase для iOS...');
-        setTimeout(() => {
-            syncWithFirebase();
-        }, 2000);
+        console.log('🍎 iOS: Приоритет Firebase над localStorage');
+        // Сначала загружаем из Firebase, потом из localStorage как fallback
+        loadDataFromFirebaseFirst();
         
         // Добавляем кнопку синхронизации для iOS
         addIOSSyncButton();
+    } else {
+        // Для других устройств - стандартная логика
+        loadLocalState();
     }
+    
+    // ПРИНУДИТЕЛЬНО сбрасываем верификацию при каждом запуске
+    appState.isVerified = false;
     console.log('🔒 Сброс верификации при запуске приложения');
     
     // Проверяем, есть ли сохраненный пользователь
@@ -6371,9 +6457,19 @@ async function saveDataToFirebaseSilent() {
         return false;
     }
     
+    // Для iOS - принудительное сохранение даже если Firebase недоступен
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+        console.log('🍎 iOS: Принудительное сохранение в Firebase');
+    }
+    
     if (!isFirebaseAvailable()) {
-        console.log('Firebase недоступен, сохраняем только локально');
-        return false;
+        if (isIOS) {
+            console.log('🍎 iOS: Firebase недоступен, но продолжаем попытку сохранения');
+        } else {
+            console.log('Firebase недоступен, сохраняем только локально');
+            return false;
+        }
     }
 
     if (!navigator.onLine) {

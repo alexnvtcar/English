@@ -63,11 +63,42 @@ function validateTaskData(task) {
     if (!task.name || task.name.trim().length === 0) {
         throw new Error('Название задания не может быть пустым');
     }
+    if (task.name.trim().length > 100) {
+        throw new Error('Название задания слишком длинное (максимум 100 символов)');
+    }
     if (!task.xpReward || task.xpReward < 1) {
         throw new Error('XP награда должна быть больше 0');
     }
+    if (task.xpReward > 1000) {
+        throw new Error('XP награда слишком большая (максимум 1000)');
+    }
     if (!task.duration || task.duration < 1) {
         throw new Error('Длительность должна быть больше 0');
+    }
+    if (task.duration > 480) {
+        throw new Error('Длительность слишком большая (максимум 480 минут)');
+    }
+    return true;
+}
+
+// Валидация данных награды
+function validateRewardData(reward) {
+    if (!reward.description || reward.description.trim().length === 0) {
+        throw new Error('Описание награды не может быть пустым');
+    }
+    if (reward.description.trim().length > 200) {
+        throw new Error('Описание награды слишком длинное (максимум 200 символов)');
+    }
+    return true;
+}
+
+// Валидация PIN-кода
+function validatePinCode(pin) {
+    if (!pin || pin.length !== 4) {
+        throw new Error('PIN-код должен содержать 4 цифры');
+    }
+    if (!/^\d{4}$/.test(pin)) {
+        throw new Error('PIN-код должен содержать только цифры');
     }
     return true;
 }
@@ -279,6 +310,38 @@ let appState = {
 
 function getEffectiveState() {
     return appState;
+}
+
+// Универсальная функция для улучшения touch событий на iOS
+function enhanceTouchEvents() {
+    if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+        console.log('🍎 Улучшаем touch события для iOS');
+        
+        // Добавляем обработчики для всех кнопок
+        document.addEventListener('DOMContentLoaded', function() {
+            const allButtons = document.querySelectorAll('button, .btn, .task-item, .calendar-day, .icon-option');
+            allButtons.forEach(element => {
+                // Убираем выделение текста
+                element.style.webkitTouchCallout = 'none';
+                element.style.webkitUserSelect = 'none';
+                element.style.userSelect = 'none';
+                
+                // Добавляем визуальную обратную связь
+                element.addEventListener('touchstart', function(e) {
+                    this.style.transform = 'scale(0.95)';
+                    this.style.transition = 'transform 0.1s ease';
+                }, { passive: true });
+                
+                element.addEventListener('touchend', function(e) {
+                    this.style.transform = 'scale(1)';
+                }, { passive: true });
+                
+                element.addEventListener('touchcancel', function(e) {
+                    this.style.transform = 'scale(1)';
+                }, { passive: true });
+            });
+        });
+    }
 }
 
 // Utility Functions
@@ -705,16 +768,6 @@ function applyRolePermissions() {
     
     // Обновляем отображение заданий с учетом роли
     renderTasks();
-    
-    // Исправляем touch events для iOS после рендеринга
-    setTimeout(() => {
-        fixIOSTouchEvents();
-    }, 100);
-    
-    // Дополнительная очистка невидимых слоев после рендеринга
-    setTimeout(() => {
-        clearInvisibleLayers();
-    }, 200);
 }
 
 function showNotification(message, type = "success") {
@@ -728,32 +781,68 @@ function showNotification(message, type = "success") {
     }
     if (notification) {
         notification.className = `notification ${type} show`;
-        
-        // Для iOS: принудительно обновляем стили
-        if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
-            notification.style.pointerEvents = 'none';
-            notification.style.touchAction = 'none';
-            notification.style.zIndex = '1400';
-        }
     }
 
-    // Уменьшаем время показа для iOS, чтобы не блокировать интерфейс
+    // Определяем время отображения в зависимости от устройства и типа уведомления
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const displayTime = isIOS ? 2000 : 3000; // 2 секунды для iOS, 3 для остальных
+    const isTaskCompletion = message.includes('Задание выполнено');
+    const isDataSaved = message.includes('сохранен') || message.includes('сохранены');
+    
+    let displayTime = 3000; // По умолчанию 3 секунды
+    
+    if (isIOS) {
+        if (isTaskCompletion || isDataSaved) {
+            displayTime = 1000; // 1 секунда для iPhone/iPad
+        } else {
+            displayTime = 2000; // 2 секунды для других уведомлений
+        }
+    }
 
     safeSetTimeout(() => {
         if (notification) {
             notification.classList.remove("show");
-            
-            // Дополнительная очистка для iOS
-            if (isIOS) {
-                setTimeout(() => {
-                    notification.style.pointerEvents = 'none';
-                    notification.style.touchAction = 'none';
-                }, 100);
-            }
         }
     }, displayTime);
+}
+
+// Специальная функция для быстрых уведомлений на iOS
+function showQuickNotification(message, type = "success") {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (isIOS) {
+        // Для iOS показываем уведомление на 1 секунду
+        showNotification(message, type);
+    } else {
+        // Для других устройств обычное время
+        showNotification(message, type);
+    }
+}
+
+// Специальная функция для мгновенных уведомлений на iOS (0.8 секунды)
+function showInstantNotification(message, type = "success") {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (isIOS) {
+        // Для iOS показываем уведомление на 0.8 секунды
+        const notification = document.getElementById("notification");
+        const messageEl = document.getElementById("notificationMessage");
+
+        if (messageEl) {
+            messageEl.textContent = message;
+        }
+        if (notification) {
+            notification.className = `notification ${type} show`;
+        }
+
+        safeSetTimeout(() => {
+            if (notification) {
+                notification.classList.remove("show");
+            }
+        }, 800); // 0.8 секунды для мгновенных уведомлений
+    } else {
+        // Для других устройств обычное время
+        showNotification(message, type);
+    }
 }
 
 
@@ -1617,7 +1706,7 @@ function renderTasks() {
         )
         .join("");
     
-    // Исправление для iPhone: переустанавливаем обработчики событий
+    // Улучшенная обработка touch событий для iOS
     if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
         // Принудительно обновляем z-index и pointer-events для всех элементов
         const taskItems = taskList.querySelectorAll('.task-item');
@@ -1625,12 +1714,31 @@ function renderTasks() {
             item.style.position = 'relative';
             item.style.zIndex = '1';
             item.style.pointerEvents = 'auto';
+            item.style.webkitTouchCallout = 'none';
+            item.style.webkitUserSelect = 'none';
+            item.style.userSelect = 'none';
             
             const buttons = item.querySelectorAll('button');
             buttons.forEach(btn => {
                 btn.style.position = 'relative';
                 btn.style.zIndex = '2';
                 btn.style.pointerEvents = 'auto';
+                btn.style.webkitTouchCallout = 'none';
+                btn.style.webkitUserSelect = 'none';
+                btn.style.userSelect = 'none';
+                
+                // Добавляем обработчики touch событий
+                btn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    this.style.transform = 'scale(0.95)';
+                }, { passive: false });
+                
+                btn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    this.style.transform = 'scale(1)';
+                    // Выполняем клик
+                    this.click();
+                }, { passive: false });
             });
         });
     }
@@ -2214,7 +2322,7 @@ function executeTaskCompletion(task, customXP, customTime, completionDate = new 
         // Show completion notification
         const isToday = formatDate(completionDate) === formatDate(new Date());
         const dateStr = isToday ? 'сегодня' : completionDate.toLocaleDateString('ru-RU');
-        showNotification(`Задание выполнено ${dateStr}! +${customXP} XP`, "success");
+        showInstantNotification(`Задание выполнено ${dateStr}! +${customXP} XP`, "success");
         
         // 3. Проверяем, что все показатели обновлены
         console.log('✅ Задание выполнено, показатели обновлены');
@@ -2804,7 +2912,7 @@ function saveRewardIdea(event) {
     console.log('✅ Идея награды сохранена, показатели обновлены');
     
     hideIdeaModal();
-    showNotification('Награда сохранена! Все показатели пересчитаны.', 'success');
+    showQuickNotification('Награда сохранена! Все показатели пересчитаны.', 'success');
     
                         // Автоматически сохраняем в Firebase после сохранения идеи награды
         safeSetTimeout(() => {
@@ -3209,8 +3317,8 @@ function initApp() {
     console.log('👤 Текущий пользователь:', appState.userName);
     console.log('🔍 PIN-коды будут загружены из Firebase');
     
-    // Показываем выбор учетной записи сразу после инициализации
-    console.log('👤 Показываем выбор учетной записи после инициализации...');
+    // НЕ показываем верификацию сразу - ждем завершения синхронизации
+    console.log('⏳ Ожидаем завершения синхронизации перед показом верификации...');
     
     // Показываем индикатор загрузки
     showSyncStatus('syncing', 'Загружаем данные...');
@@ -3224,8 +3332,8 @@ function initApp() {
             console.log('❌ PIN-коды не загружены из Firebase');
             showNotification('PIN-коды не загружены. Проверьте интернет-соединение.', 'error');
             
-            // Не показываем выбор учетной записи здесь - будет показан в конце initApp
-            console.log('⏳ Ожидаем завершения инициализации для показа выбора учетной записи');
+            // Показываем выбор учетной записи, если PIN-коды не загружены
+            showAccountSelection();
             return;
         }
         
@@ -3250,6 +3358,9 @@ function initApp() {
             updateRedeemControls();
             updateProgressWeekSection();
             updateMonthlyProgressSection();
+            
+            // 3. Улучшаем touch события для iOS
+            enhanceTouchEvents();
             updateWeeklyStars();
             
             // 3. Проверяем, что все показатели обновлены
@@ -3269,13 +3380,13 @@ function initApp() {
             
             showVerificationModal();
         } else {
-        // Если PIN-кода нет, не показываем выбор учетной записи здесь
-        console.log('👤 PIN-код не найден, ожидаем завершения инициализации');
-        
-        // Автоматическое сохранение отключено при показе выбора учетной записи
-        // saveDataToFirebase();
-        
-        // showAccountSelection(); // Убираем дублирование - будет вызвано в конце initApp
+            // Если PIN-кода нет, показываем выбор учетной записи
+            console.log('👤 PIN-код не найден, показываем выбор учетной записи');
+            
+            // Автоматическое сохранение отключено при показе выбора учетной записи
+            // saveDataToFirebase();
+            
+            showAccountSelection();
         }
     };
 
@@ -3384,26 +3495,6 @@ function initApp() {
     setTimeout(() => {
         showNotification('🔧 Доступны новые функции тестирования в настройках!', 'info');
     }, 3000);
-    
-    // Исправляем touch events для iOS
-    setTimeout(() => {
-        fixIOSTouchEvents();
-    }, 1000);
-    
-    // Дополнительная очистка невидимых слоев для iOS
-    setTimeout(() => {
-        clearInvisibleLayers();
-    }, 2000);
-    
-    // Показываем выбор учетной записи после завершения инициализации
-    // Увеличиваем задержку для iPhone, чтобы интерфейс успел загрузиться
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const delay = isIOS ? 2000 : 1000; // 2 секунды для iOS, 1 для остальных
-    
-    setTimeout(() => {
-        console.log('👤 Показываем выбор учетной записи с задержкой:', delay + 'мс');
-        showAccountSelection();
-    }, delay);
 }
 
 // Delete Task Function
@@ -5565,38 +5656,17 @@ function selectAccount(role) {
     console.log(`✅ Учетная запись изменена: ${previousUserName} (${previousRole}) → ${appState.userName} (${appState.role})`);
     
     // Закрываем модальное окно выбора учетной записи
-    const accountModal = document.getElementById('accountModal');
+    document.getElementById('accountModal').classList.remove('show');
+    
+    // Убираем затемнение и показываем основной контент
     const overlay = document.getElementById('modalOverlay');
     const container = document.querySelector('.container');
+    if (overlay) overlay.classList.remove('show');
+    if (container) container.classList.remove('hidden');
     
-    console.log('👤 Закрываем модальное окно выбора учетной записи');
-    
-    // Скрываем модальное окно
-    if (accountModal) {
-        accountModal.classList.remove('show');
-    }
-    
-    // Скрываем полупрозрачный слой
-    if (overlay) {
-        overlay.classList.remove('show');
-    }
-    
-    // Показываем основной контент
-    if (container) {
-        container.classList.remove('hidden');
-    }
-    
-    // Показываем верификацию для входа с задержкой
+    // Показываем верификацию для входа
     appState.isVerified = false;
-    
-    // Добавляем задержку для iPhone, чтобы пользователь успел увидеть закрытие модального окна
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const verificationDelay = isIOS ? 1500 : 500; // 1.5 секунды для iOS, 0.5 для остальных
-    
-    setTimeout(() => {
-        console.log('🔐 Показываем верификацию с задержкой:', verificationDelay + 'мс');
-        showVerificationModal();
-    }, verificationDelay);
+    showVerificationModal();
     
     console.log('🔄 Учетная запись изменена, пересчитываем все показатели...');
     
@@ -5631,66 +5701,13 @@ function selectAccount(role) {
 function showChangeAccountModal() {
     // Сбрасываем статус верификации при смене учетной записи
     appState.isVerified = false;
+    document.getElementById('accountModal').classList.add('show');
     
-    const accountModal = document.getElementById('accountModal');
+    // Скрываем основной контент и показываем затемнение
     const overlay = document.getElementById('modalOverlay');
     const container = document.querySelector('.container');
-    
-    console.log('👤 Показываем модальное окно выбора учетной записи');
-    
-    // Для iOS: принудительно устанавливаем стили
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    
-    if (isIOS) {
-        console.log('🍎 iOS: Принудительно показываем модальное окно');
-        
-        // Очищаем невидимые слои
-        clearInvisibleLayers();
-        
-        // Принудительно показываем модальное окно
-        if (accountModal) {
-            accountModal.style.display = 'flex';
-            accountModal.style.position = 'fixed';
-            accountModal.style.top = '0';
-            accountModal.style.left = '0';
-            accountModal.style.width = '100%';
-            accountModal.style.height = '100%';
-            accountModal.style.zIndex = '1100';
-            accountModal.style.alignItems = 'center';
-            accountModal.style.justifyContent = 'center';
-            accountModal.classList.add('show');
-        }
-        
-        // Принудительно показываем overlay
-        if (overlay) {
-            overlay.style.display = 'block';
-            overlay.style.position = 'fixed';
-            overlay.style.top = '0';
-            overlay.style.left = '0';
-            overlay.style.width = '100%';
-            overlay.style.height = '100%';
-            overlay.style.zIndex = '1000';
-            overlay.classList.add('show');
-        }
-        
-        // Скрываем основной контент
-        if (container) {
-            container.classList.add('hidden');
-        }
-    } else {
-        // Обычное поведение для не-iOS
-        if (accountModal) {
-            accountModal.classList.add('show');
-        }
-        
-        if (overlay) {
-            overlay.classList.add('show');
-        }
-        
-        if (container) {
-            container.classList.add('hidden');
-        }
-    }
+    if (overlay) overlay.classList.add('show');
+    if (container) container.classList.add('hidden');
     
     console.log('🔄 Показываем смену учетной записи, пересчитываем все показатели...');
     
@@ -6147,7 +6164,7 @@ async function confirmSetupPin() {
             const saved = await savePinCodesToFirebase();
             if (saved) {
                 console.log('✅ PIN-код успешно сохранен в Firebase');
-                showNotification('PIN-код установлен и сохранен в облаке!', 'success');
+                showQuickNotification('PIN-код установлен и сохранен в облаке!', 'success');
             } else {
                 console.log('❌ Не удалось сохранить PIN-код в Firebase');
                 showNotification('PIN-код установлен локально, но не сохранен в облаке', 'warning');
@@ -6587,6 +6604,9 @@ async function saveDataToFirebase() {
     saveBtn.classList.add('loading');
 
     try {
+        // Показываем индикатор загрузки
+        showNotification('Сохранение данных в Firebase...', 'info');
+        
         // Call the original save function with showDetails flag for manual save
         const result = await saveStateToFirestore(true);
         
@@ -6742,7 +6762,7 @@ async function saveStateToFirestore(showDetails = false) {
         // Здесь их не сохраняем, чтобы избежать дублирования
         
         console.log('✅ Данные успешно сохранены в Firebase');
-        showNotification('Данные сохранены в Firebase', 'success');
+        showInstantNotification('Данные сохранены в Firebase', 'success');
         
         // Показываем детальную информацию о сохранении только при ручном сохранении
         if (showDetails) {
@@ -7851,15 +7871,6 @@ function showAccountSelection() {
     // 3. Проверяем, что все показатели обновлены
     console.log('✅ Выбор учетной записи показан, все показатели пересчитаны');
     
-    // 4. ПОКАЗЫВАЕМ МОДАЛЬНОЕ ОКНО ВЫБОРА УЧЕТНОЙ ЗАПИСИ с задержкой
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const modalDelay = isIOS ? 500 : 200; // 0.5 секунды для iOS, 0.2 для остальных
-    
-    setTimeout(() => {
-        console.log('👤 Показываем модальное окно выбора учетной записи с задержкой:', modalDelay + 'мс');
-        showChangeAccountModal();
-    }, modalDelay);
-    
                             // Применяем роли для правильного отображения блоков настроек
             applyRolePermissions();
             
@@ -8574,8 +8585,8 @@ window.showVerificationAfterSync = () => {
         console.log('❌ PIN-коды не загружены из Firebase');
         showNotification('PIN-коды не загружены. Проверьте интернет-соединение.', 'error');
         
-        // Не показываем выбор учетной записи здесь - будет показан в конце initApp
-        console.log('⏳ Ожидаем завершения инициализации для показа выбора учетной записи');
+        // Показываем выбор учетной записи, если PIN-коды не загружены
+        showAccountSelection();
         return;
     }
     
@@ -8610,9 +8621,9 @@ window.showVerificationAfterSync = () => {
     
     showVerificationModal();
     } else {
-        // Если PIN-кода нет, не показываем выбор учетной записи здесь
-        console.log('👤 PIN-код не найден, ожидаем завершения инициализации');
-        // showAccountSelection(); // Убираем дублирование - будет вызвано в конце initApp
+        // Если PIN-кода нет, показываем выбор учетной записи
+        console.log('👤 PIN-код не найден, показываем выбор учетной записи');
+        showAccountSelection();
     }
 };
 
@@ -8699,7 +8710,11 @@ function processNotificationQueue() {
     isProcessingQueue = true;
     const notification = notificationQueue.shift();
     console.log('🔔 Processing notification:', notification);
-    createNotificationElement(notification);
+    
+    // Добавляем задержку между уведомлениями для лучшего UX
+    setTimeout(() => {
+        createNotificationElement(notification);
+    }, 100);
 }
 
 // Create notification DOM element
@@ -8717,7 +8732,7 @@ function createNotificationElement(notification) {
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) scale(0.8) !important;
-        z-index: 10000 !important;
+        z-index: var(--z-critical, 2000) !important;
         background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%) !important;
         border: 3px solid #3b82f6 !important;
         border-radius: 20px !important;
@@ -8763,8 +8778,8 @@ function createNotificationElement(notification) {
     notification.element = notificationEl;
     console.log('🔔 Notification element added to body:', notificationEl);
 
-    // Show animation
-    safeSetTimeout(() => {
+    // Show animation with GPU acceleration
+    requestAnimationFrame(() => {
         notificationEl.style.transform = 'translate(-50%, -50%) scale(1)';
         notificationEl.style.opacity = '1';
         console.log('🔔 Notification shown:', notification.id);
@@ -9601,7 +9616,7 @@ async function saveBackupSettings() {
         return;
     }
     
-    showNotification('Настройки бэкапов сохранены!', 'success');
+    showQuickNotification('Настройки бэкапов сохранены!', 'success');
 }
 
 // Восстановить из бэкапа (общий)
@@ -9703,7 +9718,7 @@ async function restoreFromSpecificBackup(backupId) {
         
         if (localSaveResult && firebaseSaveResult) {
             console.log('✅ Восстановленные данные успешно сохранены локально и в Firebase');
-            showNotification('Данные восстановлены из бэкапа и сохранены!', 'success');
+            showQuickNotification('Данные восстановлены из бэкапа и сохранены!', 'success');
         } else if (localSaveResult) {
             console.log('✅ Восстановленные данные сохранены локально, Firebase недоступен');
             showNotification('Данные восстановлены из бэкапа и сохранены локально', 'success');
@@ -9770,7 +9785,7 @@ async function exitApp() {
         const saveResult = await saveDataToFirebase();
         
         if (saveResult) {
-showNotification('Данные сохранены. Выход из приложения...', 'success');
+showQuickNotification('Данные сохранены. Выход из приложения...', 'success');
 
             // Ждем немного, чтобы пользователь увидел уведомление
             setTimeout(() => {
@@ -9907,17 +9922,11 @@ function openTestPage(testFile) {
     }
     
     // Открываем тестовую страницу в новой вкладке
-    // Используем относительный путь для локальных файлов
-    const testUrl = './' + testFile;
-    console.log('🔗 Открываем URL:', testUrl);
+    const testUrl = window.location.origin + '/' + testFile;
+    window.open(testUrl, '_blank');
     
-    try {
-        window.open(testUrl, '_blank');
-        showNotification(`Открыт тест: ${testFile}`, 'info');
-    } catch (error) {
-        console.error('❌ Ошибка открытия тестовой страницы:', error);
-        showNotification(`Ошибка открытия ${testFile}: ${error.message}`, 'error');
-    }
+    // Показываем уведомление
+    showNotification(`Открыт тест: ${testFile}`, 'info');
 }
 
 function showTestSelector() {
@@ -10070,151 +10079,6 @@ function diagnoseIOSSync() {
     showNotification('Диагностика iOS завершена - проверьте консоль', 'info');
 }
 
-// Функция для очистки невидимых слоев на iOS
-function clearInvisibleLayers() {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (!isIOS) return;
-    
-    console.log('🍎 Очищаем невидимые слои на iOS...');
-    
-    // Удаляем все скрытые модальные уведомления
-    const hiddenNotifications = document.querySelectorAll('.popup-notification:not(.show)');
-    hiddenNotifications.forEach(notification => {
-        notification.style.display = 'none';
-        notification.style.pointerEvents = 'none';
-        notification.style.touchAction = 'none';
-    });
-    
-    // Удаляем все скрытые модальные окна
-    const hiddenModals = document.querySelectorAll('.modal:not([style*="display: block"])');
-    hiddenModals.forEach(modal => {
-        modal.style.display = 'none';
-        modal.style.pointerEvents = 'none';
-    });
-    
-    // Очищаем все элементы с opacity: 0
-    const invisibleElements = document.querySelectorAll('[style*="opacity: 0"], [style*="opacity:0"]');
-    invisibleElements.forEach(element => {
-        if (element.style.position === 'fixed' || element.style.position === 'absolute') {
-            element.style.display = 'none';
-            element.style.pointerEvents = 'none';
-        }
-    });
-    
-    // Принудительно скрываем все уведомления
-    const allNotifications = document.querySelectorAll('.notification, .popup-notification');
-    allNotifications.forEach(notification => {
-        notification.classList.remove('show');
-        notification.style.display = 'none';
-        notification.style.pointerEvents = 'none';
-        notification.style.touchAction = 'none';
-    });
-    
-    console.log('✅ Невидимые слои очищены');
-}
-
-// Функция для исправления touch events на iOS
-function fixIOSTouchEvents() {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (!isIOS) return;
-    
-    console.log('🍎 Исправляем touch events для iOS...');
-    
-    // Сначала очищаем невидимые слои
-    clearInvisibleLayers();
-    
-    // Исправляем все интерактивные элементы
-    const interactiveElements = document.querySelectorAll(
-        '.task-item, .reward-item, .calendar-day, .btn, button, .settings-item, .modal-content'
-    );
-    
-    interactiveElements.forEach(element => {
-        // Убираем стандартные iOS touch эффекты
-        element.style.webkitTapHighlightColor = 'transparent';
-        element.style.webkitTouchCallout = 'none';
-        element.style.webkitUserSelect = 'none';
-        element.style.userSelect = 'none';
-        element.style.touchAction = 'manipulation';
-        
-        // Добавляем обработчики для лучшей отзывчивости
-        element.addEventListener('touchstart', function(e) {
-            this.style.transform = 'scale(0.98)';
-        }, { passive: true });
-        
-        element.addEventListener('touchend', function(e) {
-            this.style.transform = 'scale(1)';
-        }, { passive: true });
-        
-        element.addEventListener('touchcancel', function(e) {
-            this.style.transform = 'scale(1)';
-        }, { passive: true });
-    });
-    
-    // Исправляем календарь
-    const calendarGrid = document.querySelector('.calendar-grid');
-    if (calendarGrid) {
-        calendarGrid.style.webkitOverflowScrolling = 'touch';
-        calendarGrid.style.touchAction = 'manipulation';
-    }
-    
-    // Исправляем модальные окна
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        modal.style.webkitOverflowScrolling = 'touch';
-    });
-    
-    console.log('✅ iOS touch events исправлены');
-}
-
-// Функция для принудительного показа модального окна выбора учетной записи на iOS
-function forceShowAccountSelection() {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (!isIOS) {
-        console.log('⚠️ Функция предназначена только для iOS устройств');
-        return;
-    }
-    
-    console.log('🍎 iOS: Принудительно показываем выбор учетной записи');
-    
-    // Очищаем все невидимые слои
-    clearInvisibleLayers();
-    
-    // Принудительно показываем модальное окно
-    const accountModal = document.getElementById('accountModal');
-    const overlay = document.getElementById('modalOverlay');
-    const container = document.querySelector('.container');
-    
-    if (accountModal) {
-        accountModal.style.display = 'flex';
-        accountModal.style.position = 'fixed';
-        accountModal.style.top = '0';
-        accountModal.style.left = '0';
-        accountModal.style.width = '100%';
-        accountModal.style.height = '100%';
-        accountModal.style.zIndex = '1100';
-        accountModal.style.alignItems = 'center';
-        accountModal.style.justifyContent = 'center';
-        accountModal.classList.add('show');
-    }
-    
-    if (overlay) {
-        overlay.style.display = 'block';
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100%';
-        overlay.style.height = '100%';
-        overlay.style.zIndex = '1000';
-        overlay.classList.add('show');
-    }
-    
-    if (container) {
-        container.classList.add('hidden');
-    }
-    
-    console.log('✅ iOS: Модальное окно выбора учетной записи принудительно показано');
-}
-
 // Функция для переключения видимости блока технической диагностики
 function showTechDiagnosticsBlock() {
     console.log('🔧 Переключение блока технической диагностики...');
@@ -10264,9 +10128,6 @@ if (typeof window !== 'undefined') {
     window.forceIOSSync = forceIOSSync;
     window.diagnoseIOSSync = diagnoseIOSSync;
     window.showTechDiagnosticsBlock = showTechDiagnosticsBlock;
-    window.fixIOSTouchEvents = fixIOSTouchEvents;
-    window.clearInvisibleLayers = clearInvisibleLayers;
-    window.forceShowAccountSelection = forceShowAccountSelection;
     console.log('🧪 Test functions registered globally');
 }
         

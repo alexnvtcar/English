@@ -10,6 +10,7 @@
   --z-tooltip: 1300;
   --z-notification: 1400;
   --z-popup: 1500;
+  --z-critical: 2000;
   --z-debug: 9999;
 }
 
@@ -37,7 +38,12 @@
 
 /* Попапы */
 .popup-notification {
-  z-index: var(--z-popup);
+  z-index: var(--z-critical);
+}
+
+/* Критические уведомления */
+.critical-notification {
+  z-index: var(--z-critical);
 }
 
 /* Специальные модальные окна */

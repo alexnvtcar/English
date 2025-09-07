@@ -1985,8 +1985,6 @@
                 gap: 12px;
                 min-width: 300px;
                 box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
-                pointer-events: none; /* Не блокируем touch events */
-                touch-action: none; /* Отключаем touch действия для уведомлений */
             }
 
             .notification.show {
@@ -2787,34 +2785,6 @@
                     padding: 16px;
                 }
                 
-                /* Исправляем проблемы с touch events на iOS */
-                .task-item, .reward-item, .calendar-day, .btn, button, .settings-item {
-                    -webkit-tap-highlight-color: transparent;
-                    -webkit-touch-callout: none;
-                    -webkit-user-select: none;
-                    user-select: none;
-                    touch-action: manipulation;
-                }
-                
-                /* Улучшаем отзывчивость кнопок */
-                .task-item:active, .reward-item:active, .calendar-day:active {
-                    transform: scale(0.98);
-                    transition: transform 0.1s ease;
-                }
-                
-                /* Исправляем проблемы с календарем */
-                .calendar-grid {
-                    touch-action: manipulation;
-                    -webkit-overflow-scrolling: touch;
-                }
-                
-                .calendar-day {
-                    min-height: 44px; /* Минимальный размер для touch */
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                
                 .main-header h1 {
                     font-size: 1.8rem;
                 }
@@ -2860,6 +2830,99 @@
                 
                 .stat-value {
                     font-size: 2rem;
+                }
+            }
+            
+            /* iPhone Max (iPhone 14 Pro Max, 15 Pro Max, etc.) */
+            @media screen and (min-width: 428px) and (max-width: 430px) and (-webkit-min-device-pixel-ratio: 3) {
+                .container {
+                    padding: 20px;
+                    max-width: 100%;
+                }
+                
+                .main-header h1 {
+                    font-size: 2.5rem;
+                    line-height: 1.2;
+                }
+                
+                .main-header p {
+                    font-size: 1.1rem;
+                }
+                
+                .card {
+                    padding: 24px;
+                    margin-bottom: 24px;
+                }
+                
+                .card-title {
+                    font-size: 1.6rem;
+                }
+                
+                .stat-value {
+                    font-size: 3.5rem;
+                }
+                
+                .stat-unit {
+                    font-size: 1.2rem;
+                }
+                
+                .stat-label {
+                    font-size: 0.9rem;
+                }
+                
+                .grid-cols-3 {
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 20px;
+                }
+                
+                .grid-cols-2 {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 20px;
+                }
+                
+                .task-item {
+                    padding: 16px;
+                    font-size: 1rem;
+                }
+                
+                .btn {
+                    padding: 12px 20px;
+                    font-size: 1rem;
+                }
+                
+                .modal-content {
+                    max-width: 90vw;
+                    margin: 20px;
+                }
+                
+                .settings-menu {
+                    max-width: 90vw;
+                    right: 20px;
+                }
+            }
+            
+            /* iPhone Plus (iPhone 8 Plus, XR, 11, etc.) */
+            @media screen and (min-width: 414px) and (max-width: 428px) and (-webkit-min-device-pixel-ratio: 2) {
+                .container {
+                    padding: 18px;
+                }
+                
+                .main-header h1 {
+                    font-size: 2.25rem;
+                }
+                
+                .stat-value {
+                    font-size: 3rem;
+                }
+                
+                .grid-cols-3 {
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 18px;
+                }
+                
+                .grid-cols-2 {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 18px;
                 }
             }
             
@@ -3222,6 +3285,29 @@
             
             /* iOS Safari Specific Fixes */
             @supports (-webkit-touch-callout: none) {
+                /* Оптимизация уведомлений для iOS */
+                .notification {
+                    transition: all 0.2s ease-in-out !important;
+                    will-change: transform, opacity;
+                    backface-visibility: hidden;
+                    transform: translateZ(0);
+                }
+                
+                .notification.show {
+                    animation: notificationSlideIn 0.2s ease-out;
+                }
+                
+                @keyframes notificationSlideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-20px) translateZ(0);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) translateZ(0);
+                    }
+                }
+                
                 .btn,
                 .task-item,
                 .calendar-day,
@@ -6838,7 +6924,6 @@
                 gap: 12px;
                 max-width: 400px;
                 pointer-events: none;
-                touch-action: none; /* Отключаем touch действия для контейнера уведомлений */
             }
 
             /* Individual Notification */
@@ -6849,8 +6934,7 @@
                 padding: 20px;
                 box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
                 backdrop-filter: blur(10px);
-                pointer-events: none; /* Не блокируем touch events */
-                touch-action: none; /* Отключаем touch действия для popup уведомлений */
+                pointer-events: auto;
                 position: relative;
                 overflow: hidden;
                 transform: translateX(100%);
@@ -7127,142 +7211,12 @@
             padding: 30px !important;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
             backdrop-filter: blur(20px) !important;
-            pointer-events: none !important; /* Не блокируем touch events */
-            touch-action: none !important; /* Отключаем touch действия для модальных уведомлений */
+            pointer-events: auto !important;
             max-width: 500px !important;
             min-width: 400px !important;
             opacity: 0 !important;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            display: none !important; /* Полностью скрываем когда не показываем */
-        }
-        
-        /* Показываем только когда есть класс show */
-        .popup-notification.show {
-            display: block !important;
-            opacity: 1 !important;
-        }
-
-        /* iOS Touch Events Fixes */
-        @supports (-webkit-touch-callout: none) {
-            /* Стили только для iOS */
-            .task-item, .reward-item, .calendar-day, .btn, button, .settings-item {
-                -webkit-tap-highlight-color: transparent;
-                -webkit-touch-callout: none;
-                -webkit-user-select: none;
-                user-select: none;
-                touch-action: manipulation;
-            }
-            
-            /* Исправляем модальное окно выбора учетной записи на iOS */
-            #accountModal {
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-                z-index: 1100 !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                background: rgba(0, 0, 0, 0.5) !important;
-            }
-            
-            #accountModal .modal-content {
-                position: relative !important;
-                z-index: 1101 !important;
-                background: white !important;
-                border-radius: 16px !important;
-                padding: 24px !important;
-                max-width: 500px !important;
-                width: 90% !important;
-                max-height: 80vh !important;
-                overflow-y: auto !important;
-                -webkit-overflow-scrolling: touch !important;
-            }
-            
-            #modalOverlay {
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-                z-index: 1000 !important;
-                background: rgba(0, 0, 0, 0.7) !important;
-            }
-            
-            /* Улучшаем кнопки в модальном окне выбора учетной записи */
-            #accountModal .btn {
-                min-height: 60px !important;
-                font-size: 1.1rem !important;
-                font-weight: 600 !important;
-                padding: 20px !important;
-                margin: 10px 0 !important;
-                border-radius: 12px !important;
-                transition: all 0.2s ease !important;
-                -webkit-tap-highlight-color: transparent !important;
-                -webkit-touch-callout: none !important;
-                -webkit-user-select: none !important;
-                user-select: none !important;
-                touch-action: manipulation !important;
-            }
-            
-            #accountModal .btn:active {
-                transform: scale(0.95) !important;
-                transition: transform 0.1s ease !important;
-            }
-            
-            /* Улучшаем отзывчивость модального окна */
-            #accountModal {
-                -webkit-overflow-scrolling: touch !important;
-                touch-action: manipulation !important;
-            }
-            
-            #accountModal .modal-content {
-                -webkit-overflow-scrolling: touch !important;
-                touch-action: manipulation !important;
-            }
-            
-            /* Улучшаем отзывчивость интерфейса */
-            .task-item:active, .reward-item:active, .calendar-day:active, .btn:active, button:active {
-                transform: scale(0.98);
-                transition: transform 0.1s ease;
-            }
-            
-            /* Исправляем проблемы с календарем на iOS */
-            .calendar-grid {
-                touch-action: manipulation;
-                -webkit-overflow-scrolling: touch;
-            }
-            
-            .calendar-day {
-                min-height: 44px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-            }
-            
-            /* Исправляем проблемы с модальными окнами */
-            .modal {
-                -webkit-overflow-scrolling: touch;
-            }
-            
-            .modal-content {
-                touch-action: manipulation;
-            }
-            
-            /* Улучшаем работу с настройками */
-            .settings-panel {
-                -webkit-overflow-scrolling: touch;
-            }
-            
-            .settings-item {
-                min-height: 44px;
-                display: flex;
-                align-items: center;
-                padding: 12px 16px;
-            }
         }
 
         /* PWA стили */

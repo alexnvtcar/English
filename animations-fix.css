@@ -81,6 +81,51 @@
 .reward-card {
     will-change: transform;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+/* Оптимизация для GPU ускорения */
+.btn,
+.calendar-day,
+.icon-option,
+.settings-item {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+/* Улучшенные анимации с GPU ускорением */
+@keyframes smoothScale {
+    0% {
+        transform: scale(1) translateZ(0);
+    }
+    50% {
+        transform: scale(1.05) translateZ(0);
+    }
+    100% {
+        transform: scale(1) translateZ(0);
+    }
+}
+
+@keyframes smoothFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) translateZ(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0);
+    }
+}
+
+/* Применяем оптимизированные анимации */
+.task-completed {
+    animation: smoothScale 0.3s ease;
+}
+
+.modal.show .modal-content {
+    animation: smoothFadeIn 0.3s ease;
 }
 
 /* Убираем анимации для пользователей с prefers-reduced-motion */

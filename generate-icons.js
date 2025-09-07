@@ -1,4 +1,9 @@
-<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+// Скрипт для генерации всех размеров иконок
+const fs = require('fs');
+const path = require('path');
+
+// Основная иконка (512x512)
+const mainIcon = `<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <!-- Основной градиент фона -->
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -33,9 +38,9 @@
     
     <!-- Тень для книги -->
     <filter id="bookShadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="8"/>
-      <feOffset dx="0" dy="4" result="offset"/>
-      <feFlood flood-color="#000000" flood-opacity="0.15"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12"/>
+      <feOffset dx="0" dy="6" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.2"/>
       <feComposite in2="offset" operator="in"/>
       <feMerge>
         <feMergeNode/>
@@ -45,9 +50,9 @@
     
     <!-- Тень для элементов -->
     <filter id="elementShadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>
-      <feOffset dx="0" dy="2" result="offset"/>
-      <feFlood flood-color="#000000" flood-opacity="0.2"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6"/>
+      <feOffset dx="0" dy="3" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity:0.25"/>
       <feComposite in2="offset" operator="in"/>
       <feMerge>
         <feMergeNode/>
@@ -57,7 +62,7 @@
     
     <!-- Блики -->
     <radialGradient id="highlight" cx="30%" cy="30%" r="40%">
-      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3" />
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.4" />
       <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
     </radialGradient>
   </defs>
@@ -113,17 +118,50 @@
   <!-- Дополнительные декоративные элементы -->
   <g opacity="0.3">
     <!-- Маленькие звездочки -->
-    <circle cx="80" cy="120" r="3" fill="#ffffff"/>
-    <circle cx="420" cy="200" r="2" fill="#ffffff"/>
-    <circle cx="90" cy="350" r="2" fill="#ffffff"/>
-    <circle cx="400" cy="400" r="3" fill="#ffffff"/>
+    <circle cx="80" cy="120" r="4" fill="#ffffff"/>
+    <circle cx="420" cy="200" r="3" fill="#ffffff"/>
+    <circle cx="90" cy="350" r="3" fill="#ffffff"/>
+    <circle cx="400" cy="400" r="4" fill="#ffffff"/>
   </g>
   
   <!-- Современные акценты -->
   <g opacity="0.4">
-    <rect x="60" y="60" width="4" height="4" rx="2" fill="#ffffff"/>
-    <rect x="440" y="100" width="3" height="3" rx="1.5" fill="#ffffff"/>
-    <rect x="70" y="420" width="3" height="3" rx="1.5" fill="#ffffff"/>
-    <rect x="430" y="380" width="4" height="4" rx="2" fill="#ffffff"/>
+    <rect x="60" y="60" width="6" height="6" rx="3" fill="#ffffff"/>
+    <rect x="440" y="100" width="4" height="4" rx="2" fill="#ffffff"/>
+    <rect x="70" y="420" width="4" height="4" rx="2" fill="#ffffff"/>
+    <rect x="430" y="380" width="6" height="6" rx="3" fill="#ffffff"/>
   </g>
-</svg>
+</svg>`;
+
+// Размеры иконок для генерации
+const iconSizes = [
+  { size: 57, name: 'icon-57x57.svg' },
+  { size: 60, name: 'icon-60x60.svg' },
+  { size: 72, name: 'icon-72x72.svg' },
+  { size: 76, name: 'icon-76x76.svg' },
+  { size: 96, name: 'icon-96x96.svg' },
+  { size: 114, name: 'icon-114x114.svg' },
+  { size: 120, name: 'icon-120x120.svg' },
+  { size: 128, name: 'icon-128x128.svg' },
+  { size: 144, name: 'icon-144x144.svg' },
+  { size: 152, name: 'icon-152x152.svg' },
+  { size: 180, name: 'icon-180x180.svg' },
+  { size: 384, name: 'icon-384x384.svg' }
+];
+
+// Функция для создания иконки определенного размера
+function createIcon(size, filename) {
+  const svg = mainIcon.replace('width="512" height="512"', `width="${size}" height="${size}"`);
+  const filePath = path.join('icons', filename);
+  fs.writeFileSync(filePath, svg);
+  console.log(`✅ Создана иконка ${filename} (${size}x${size})`);
+}
+
+// Создаем все иконки
+console.log('🚀 Начинаем генерацию иконок...');
+
+iconSizes.forEach(({ size, name }) => {
+  createIcon(size, name);
+});
+
+console.log('🎉 Все иконки успешно созданы!');

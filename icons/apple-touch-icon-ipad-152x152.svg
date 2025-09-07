@@ -1,23 +1,121 @@
 <svg width="152" height="152" viewBox="0 0 152 152" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    <!-- Основной градиент фона -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
     </linearGradient>
+    
+    <!-- Градиент для книги -->
+    <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Градиент для страниц -->
+    <linearGradient id="pageGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f1f5f9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Градиент для звезды -->
+    <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Градиент для трофея -->
+    <linearGradient id="trophyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Тень для книги -->
+    <filter id="bookShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.15"/>
+      <feComposite in2="offset" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Тень для элементов -->
+    <filter id="elementShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+      <feOffset dx="0" dy="1" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.2"/>
+      <feComposite in2="offset" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Блики -->
+    <radialGradient id="highlight" cx="30%" cy="30%" r="40%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+    </radialGradient>
   </defs>
   
-  <!-- Background -->
-  <rect width="152" height="152" rx="22.8" fill="url(#bg)"/>
+  <!-- Фон с градиентом -->
+  <rect width="152" height="152" rx="30" fill="url(#bgGradient)"/>
   
-  <!-- Book -->
-  <rect x="38" y="30.400000000000002" width="76" height="91.2" rx="4.56" fill="#ffffff"/>
+  <!-- Дополнительный слой для глубины -->
+  <rect width="152" height="152" rx="30" fill="url(#highlight)"/>
   
-  <!-- Text lines -->
-  <rect x="45.6" y="45.6" width="60.800000000000004" height="3.04" rx="1.52" fill="#1e40af"/>
-  <rect x="45.6" y="53.199999999999996" width="53.199999999999996" height="3.04" rx="1.52" fill="#64748b"/>
-  <rect x="45.6" y="60.800000000000004" width="57.76" height="3.04" rx="1.52" fill="#64748b"/>
-  <rect x="45.6" y="68.4" width="48.64" height="3.04" rx="1.52" fill="#64748b"/>
+  <!-- Книга с тенью -->
+  <g filter="url(#bookShadow)">
+    <rect x="36" y="25" width="80" height="102" rx="6" fill="url(#bookGradient)"/>
+  </g>
   
-  <!-- Star -->
-  <text x="106.39999999999999" y="53.199999999999996" font-size="22.8" fill="#fbbf24">⭐</text>
+  <!-- Страницы книги -->
+  <rect x="40" y="29" width="72" height="94" rx="4" fill="url(#pageGradient)"/>
+  
+  <!-- Текст на страницах -->
+  <g fill="#1e293b" opacity="0.8">
+    <!-- Заголовок -->
+    <rect x="48" y="40" width="56" height="3" rx="1.5" fill="#1e40af"/>
+    <rect x="48" y="46" width="48" height="2" rx="1" fill="#64748b"/>
+    <rect x="48" y="52" width="52" height="2" rx="1" fill="#64748b"/>
+    <rect x="48" y="58" width="40" height="2" rx="1" fill="#64748b"/>
+    
+    <!-- Параграф -->
+    <rect x="48" y="68" width="56" height="3" rx="1.5" fill="#1e40af"/>
+    <rect x="48" y="74" width="48" height="2" rx="1" fill="#64748b"/>
+    <rect x="48" y="80" width="52" height="2" rx="1" fill="#64748b"/>
+    <rect x="48" y="86" width="40" height="2" rx="1" fill="#64748b"/>
+    
+    <!-- Список -->
+    <rect x="48" y="96" width="52" height="3" rx="1.5" fill="#1e40af"/>
+    <rect x="48" y="102" width="40" height="2" rx="1" fill="#64748b"/>
+    <rect x="48" y="108" width="44" height="2" rx="1" fill="#64748b"/>
+  </g>
+  
+  <!-- Звезда с градиентом и тенью -->
+  <g transform="translate(94, 60)" filter="url(#elementShadow)">
+    <path d="M9 0L11 6L17 6L13 9L14 15L9 12L4 15L5 9L1 6L7 6Z" fill="url(#starGradient)"/>
+    <!-- Блик на звезде -->
+    <path d="M7 2L9 5L11 2L9 3Z" fill="#ffffff" opacity="0.6"/>
+  </g>
+  
+  <!-- Трофей с градиентом и тенью -->
+  <g transform="translate(48, 110)" filter="url(#elementShadow)">
+    <path d="M5 0L6 1L6 2L7 2L7 3L6 3L6 4L5 4L5 3L4 3L4 2L5 2L5 1Z" fill="url(#trophyGradient)"/>
+    <!-- Блик на трофее -->
+    <path d="M4 1L5 2L6 1L5 1.5Z" fill="#ffffff" opacity="0.6"/>
+  </g>
+  
+  <!-- Дополнительные декоративные элементы -->
+  <g opacity="0.3">
+    <!-- Маленькие звездочки -->
+    <circle cx="25" cy="38" r="1" fill="#ffffff"/>
+    <circle cx="120" cy="60" r="1" fill="#ffffff"/>
+    <circle cx="30" cy="100" r="1" fill="#ffffff"/>
+    <circle cx="115" cy="120" r="1" fill="#ffffff"/>
+  </g>
 </svg>

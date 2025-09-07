@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Тест новых иконок приложения</title>
+    
+    <!-- iOS PWA мета-теги -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Icon Test">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea" />
+    <meta name="application-name" content="English Learning" />
+    <meta name="msapplication-TileColor" content="#667eea" />
+    
+    <!-- Иконки -->
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="192x192" href="./icons/icon-192x192.svg" />
+    <link rel="icon" type="image/svg+xml" sizes="512x512" href="./icons/icon-512x512.svg" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="./icons/icon-57x57.svg" />
+    <link rel="apple-touch-icon" sizes="60x60" href="./icons/icon-60x60.svg" />
+    <link rel="apple-touch-icon" sizes="72x72" href="./icons/icon-72x72.svg" />
+    <link rel="apple-touch-icon" sizes="76x76" href="./icons/icon-76x76.svg" />
+    <link rel="apple-touch-icon" sizes="114x114" href="./icons/icon-114x114.svg" />
+    <link rel="apple-touch-icon" sizes="120x120" href="./icons/icon-120x120.svg" />
+    <link rel="apple-touch-icon" sizes="144x144" href="./icons/icon-144x144.svg" />
+    <link rel="apple-touch-icon" sizes="152x152" href="./icons/icon-152x152.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180x180.svg" />
+    <link rel="apple-touch-icon" href="./icons/icon-180x180.svg" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json" />
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .icon-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .icon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .icon-card img {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .icon-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+        }
+        
+        .icon-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .features {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .features h2 {
+            margin-top: 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+        }
+        
+        .feature-text h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+        
+        .feature-text p {
+            margin: 0;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .test-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .test-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .icon-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            
+            .icon-card img {
+                width: 48px;
+                height: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Новые иконки приложения</h1>
+            <p>Современный дизайн с градиентами и тенями</p>
+        </div>
+        
+        <div class="icon-grid">
+            <div class="icon-card">
+                <img src="./icons/icon.svg" alt="Основная иконка">
+                <h3>Основная иконка</h3>
+                <p>512x512 SVG</p>
+            </div>
+            
+            <div class="icon-card">
+                <img src="./icons/icon-192x192.svg" alt="PWA иконка">
+                <h3>PWA иконка</h3>
+                <p>192x192 SVG</p>
+            </div>
+            
+            <div class="icon-card">
+                <img src="./icons/icon-512x512.svg" alt="Большая иконка">
+                <h3>Большая иконка</h3>
+                <p>512x512 SVG</p>
+            </div>
+            
+            <div class="icon-card">
+                <img src="./icons/apple-touch-icon-180x180.svg" alt="Apple Touch">
+                <h3>Apple Touch</h3>
+                <p>180x180 SVG</p>
+            </div>
+            
+            <div class="icon-card">
+                <img src="./icons/apple-touch-icon-ipad-152x152.svg" alt="iPad иконка">
+                <h3>iPad иконка</h3>
+                <p>152x152 SVG</p>
+            </div>
+            
+            <div class="icon-card">
+                <img src="./icons/apple-touch-icon-iphone-120x120.svg" alt="iPhone иконка">
+                <h3>iPhone иконка</h3>
+                <p>120x120 SVG</p>
+            </div>
+            
+            <div class="icon-card">
+                <img src="./icons/icon-57x57.svg" alt="Маленькая иконка">
+                <h3>Маленькая иконка</h3>
+                <p>57x57 SVG</p>
+            </div>
+            
+            <div class="icon-card">
+                <img src="./icons/icon-96x96.svg" alt="Средняя иконка">
+                <h3>Средняя иконка</h3>
+                <p>96x96 SVG</p>
+            </div>
+            
+            <div class="icon-card">
+                <img src="./icons/icon-384x384.svg" alt="Большая PWA иконка">
+                <h3>Большая PWA иконка</h3>
+                <p>384x384 SVG</p>
+            </div>
+        </div>
+        
+        <div class="features">
+            <h2>✨ Особенности нового дизайна</h2>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-text">
+                        <h4>Современные градиенты</h4>
+                        <p>Красивый переход от синего к фиолетовому и розовому</p>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">✨</div>
+                    <div class="feature-text">
+                        <h4>Объемные тени</h4>
+                        <p>Глубина и реалистичность благодаря теням и бликам</p>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-text">
+                        <h4>Адаптивность</h4>
+                        <p>Идеально выглядит на всех размерах экранов</p>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-text">
+                        <h4>SVG формат</h4>
+                        <p>Четкость на любом разрешении и быстрая загрузка</p>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🏆</div>
+                    <div class="feature-text">
+                        <h4>Геймификация</h4>
+                        <p>Звезды и трофеи подчеркивают игровую механику</p>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">📚</div>
+                    <div class="feature-text">
+                        <h4>Образование</h4>
+                        <p>Книга с текстом символизирует изучение языка</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-btn" onclick="testPWAInstall()">📱 Тест PWA установки</button>
+            <button class="test-btn" onclick="testIcons()">🔍 Проверить иконки</button>
+            <button class="test-btn" onclick="openMainApp()">🚀 Открыть приложение</button>
+        </div>
+    </div>
+
+    <script>
+        function testPWAInstall() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => {
+                        alert('✅ Service Worker зарегистрирован!\n\nТеперь можно установить приложение как PWA.');
+                    })
+                    .catch(() => {
+                        alert('❌ Ошибка регистрации Service Worker');
+                    });
+            } else {
+                alert('❌ Service Worker не поддерживается');
+            }
+        }
+        
+        function testIcons() {
+            const iconSizes = [
+                '57x57', '60x60', '72x72', '76x76', '96x96', '114x114',
+                '120x120', '128x128', '144x144', '152x152', '180x180',
+                '192x192', '384x384', '512x512'
+            ];
+            
+            let results = '🔍 Результаты проверки иконок:\n\n';
+            let allLoaded = true;
+            
+            iconSizes.forEach(size => {
+                const img = new Image();
+                img.onload = () => {
+                    results += `✅ icon-${size}.svg - загружена\n`;
+                };
+                img.onerror = () => {
+                    results += `❌ icon-${size}.svg - ошибка загрузки\n`;
+                    allLoaded = false;
+                };
+                img.src = `./icons/icon-${size}.svg`;
+            });
+            
+            setTimeout(() => {
+                if (allLoaded) {
+                    results += '\n🎉 Все иконки загружены успешно!';
+                } else {
+                    results += '\n⚠️ Некоторые иконки не загрузились';
+                }
+                alert(results);
+            }, 2000);
+        }
+        
+        function openMainApp() {
+            window.location.href = './index.html';
+        }
+        
+        // Автоматическая проверка при загрузке
+        window.addEventListener('load', () => {
+            console.log('🎨 Тест иконок загружен');
+            console.log('📱 PWA поддержка:', 'serviceWorker' in navigator);
+            console.log('🔍 Проверяем иконки...');
+            
+            // Проверяем основную иконку
+            const mainIcon = new Image();
+            mainIcon.onload = () => {
+                console.log('✅ Основная иконка загружена');
+            };
+            mainIcon.onerror = () => {
+                console.log('❌ Ошибка загрузки основной иконки');
+            };
+            mainIcon.src = './icons/icon.svg';
+        });
+    </script>
+</body>
+</html>

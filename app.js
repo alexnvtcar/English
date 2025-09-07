@@ -9775,11 +9775,17 @@ function openTestPage(testFile) {
     }
     
     // Открываем тестовую страницу в новой вкладке
-    const testUrl = window.location.origin + '/' + testFile;
-    window.open(testUrl, '_blank');
+    // Используем относительный путь для локальных файлов
+    const testUrl = './' + testFile;
+    console.log('🔗 Открываем URL:', testUrl);
     
-    // Показываем уведомление
-    showNotification(`Открыт тест: ${testFile}`, 'info');
+    try {
+        window.open(testUrl, '_blank');
+        showNotification(`Открыт тест: ${testFile}`, 'info');
+    } catch (error) {
+        console.error('❌ Ошибка открытия тестовой страницы:', error);
+        showNotification(`Ошибка открытия ${testFile}: ${error.message}`, 'error');
+    }
 }
 
 function showTestSelector() {

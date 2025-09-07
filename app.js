@@ -671,7 +671,8 @@ function applyRolePermissions() {
     
     // Управление видимостью блоков настроек
     const blocksToHide = [
-        { element: document.getElementById('techDiagnosticsBlock'), divider: document.getElementById('dividerBeforeTech') },
+        // Блок технической диагностики показываем всем пользователям
+        // { element: document.getElementById('techDiagnosticsBlock'), divider: document.getElementById('dividerBeforeTech') },
         { element: document.getElementById('firebaseOperationsBlock'), divider: document.getElementById('dividerBeforeFirebase') },
         { element: document.getElementById('dangerousOperationsBlock'), divider: document.getElementById('dividerBeforeDanger') },
         { element: document.getElementById('backupManagementBlock'), divider: document.getElementById('dividerBeforeBackups') }
@@ -2987,12 +2988,13 @@ async function loadDataFromFirebaseFirst() {
     console.log('🍎 iOS: Загрузка данных с приоритетом Firebase...');
     
     try {
-        // Сначала пытаемся загрузить из Firebase
-        const docRef = db.collection('app-data').doc('main');
+        // Сначала пытаемся загрузить из Firebase (используем shared-data для совместимости)
+        const docRef = db.collection('shared-data').doc('main');
         const docSnap = await docRef.get();
         
-        if (docSnap.exists()) {
-            const firebaseData = docSnap.data();
+        // Используем правильный API для проверки существования документа
+        const firebaseData = docSnap.data();
+        if (firebaseData) {
             console.log('📥 Firebase данные получены для iOS:', firebaseData);
             
             // Принудительно обновляем состояние приложения из Firebase
@@ -3039,6 +3041,13 @@ async function loadDataFromFirebaseFirst() {
             console.log('⚠️ iOS: Firebase данные не найдены, загружаем из localStorage');
             loadLocalState();
         }
+        
+        // Дополнительная диагностика для iOS
+        console.log('🍎 iOS: Диагностика синхронизации:');
+        console.log('  - Общий опыт:', appState.progress?.totalXP || 0);
+        console.log('  - Задачи:', appState.tasks?.length || 0);
+        console.log('  - Награды:', appState.rewards?.length || 0);
+        console.log('  - Активности:', Object.keys(appState.activityData || {}).length);
     } catch (error) {
         console.error('❌ iOS: Ошибка загрузки из Firebase:', error);
         console.log('🔄 iOS: Fallback на localStorage');
@@ -3341,6 +3350,11 @@ function initApp() {
 
     // Добавляем слушатель изменения размера окна для адаптивности
     window.addEventListener('resize', handleResize);
+    
+    // Показываем уведомление о новых функциях тестирования
+    setTimeout(() => {
+        showNotification('🔧 Доступны новые функции тестирования в настройках!', 'info');
+    }, 3000);
 }
 
 // Delete Task Function
@@ -6514,8 +6528,12 @@ async function saveDataToFirebaseSilent() {
     }
 
     if (!navigator.onLine) {
-        console.log('Нет интернет-соединения');
-        return false;
+        if (isIOS) {
+            console.log('🍎 iOS: Нет интернет-соединения, но продолжаем попытку сохранения');
+        } else {
+            console.log('Нет интернет-соединения');
+            return false;
+        }
     }
 
     try {
@@ -8353,11 +8371,19 @@ function restoreSettingsBlocksState() {
             const blockContent = blockTitle.nextElementSibling;
             
             if (blockContent && blockContent.classList.contains('settings-block-content')) {
-                // ВСЕГДА сворачиваем блоки при запуске/обновлении
-                blockContent.classList.remove('expanded');
-                blockContent.classList.add('collapsed');
-                blockTitle.classList.add('collapsed');
-                console.log('📁 Блок свернут при запуске:', blockName);
+                // Блок технической диагностики сворачиваем по умолчанию
+                if (blockName === 'Техническая диагностика') {
+                    blockContent.classList.remove('expanded');
+                    blockContent.classList.add('collapsed');
+                    blockTitle.classList.add('collapsed');
+                    console.log('🔧 Блок технической диагностики свернут по умолчанию');
+                } else {
+                    // Остальные блоки сворачиваем
+                    blockContent.classList.remove('expanded');
+                    blockContent.classList.add('collapsed');
+                    blockTitle.classList.add('collapsed');
+                    console.log('📁 Блок свернут при запуске:', blockName);
+                }
             }
         });
         
@@ -9737,6 +9763,225 @@ if (typeof window !== 'undefined') {
             exitApp();
         }
     });
+}
+
+// Функции для работы с тестами
+function openTestPage(testFile) {
+    console.log('🧪 Открытие тестовой страницы:', testFile);
+    
+    // Закрываем модальное окно если открыто
+    if (document.getElementById('testSelectorModal').style.display === 'block') {
+        hideTestSelectorModal();
+    }
+    
+    // Открываем тестовую страницу в новой вкладке
+    const testUrl = window.location.origin + '/' + testFile;
+    window.open(testUrl, '_blank');
+    
+    // Показываем уведомление
+    showNotification(`Открыт тест: ${testFile}`, 'info');
+}
+
+function showTestSelector() {
+    console.log('🔧 Показ селектора тестов');
+    
+    // Обновляем информацию об устройстве
+    updateDeviceInfoDisplay();
+    
+    // Определяем рекомендуемый тест
+    updateRecommendedTest();
+    
+    // Показываем модальное окно
+    document.getElementById('testSelectorModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function hideTestSelectorModal() {
+    console.log('🔧 Скрытие селектора тестов');
+    document.getElementById('testSelectorModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function updateDeviceInfoDisplay() {
+    const deviceInfo = document.getElementById('deviceInfoDisplay');
+    if (!deviceInfo) return;
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isAndroid = /Android/.test(navigator.userAgent);
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    
+    deviceInfo.innerHTML = `
+        <div><strong>User Agent:</strong> ${navigator.userAgent}</div>
+        <div><strong>Платформа:</strong> ${navigator.platform}</div>
+        <div><strong>Мобильное устройство:</strong> ${isMobile ? 'Да' : 'Нет'}</div>
+        <div><strong>iOS:</strong> ${isIOS ? 'Да' : 'Нет'}</div>
+        <div><strong>Android:</strong> ${isAndroid ? 'Да' : 'Нет'}</div>
+        <div><strong>PWA режим:</strong> ${isPWA ? 'Да' : 'Нет'}</div>
+        <div><strong>Онлайн:</strong> ${navigator.onLine ? 'Да' : 'Нет'}</div>
+        <div><strong>Размер экрана:</strong> ${screen.width}x${screen.height}</div>
+        <div><strong>Viewport:</strong> ${window.innerWidth}x${window.innerHeight}</div>
+    `;
+}
+
+function updateRecommendedTest() {
+    const recommendedTest = document.getElementById('recommendedTest');
+    if (!recommendedTest) return;
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isAndroid = /Android/.test(navigator.userAgent);
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    
+    let recommendation = '';
+    let testFile = '';
+    
+    if (isIOS) {
+        recommendation = '🍎 Рекомендуется: iPhone эмулятор - полная диагностика iOS функций';
+        testFile = 'test-iphone.html';
+    } else if (isAndroid) {
+        recommendation = '🤖 Рекомендуется: iOS тест приложения - проверка совместимости';
+        testFile = 'test-app-ios.html';
+    } else if (isMobile) {
+        recommendation = '📱 Рекомендуется: iOS тест приложения - мобильная диагностика';
+        testFile = 'test-app-ios.html';
+    } else {
+        recommendation = '💻 Рекомендуется: Общий тест приложения - базовая диагностика';
+        testFile = 'test.html';
+    }
+    
+    recommendedTest.innerHTML = `
+        <div style="margin-bottom: 10px;">${recommendation}</div>
+        <button onclick="openTestPage('${testFile}')" 
+                style="background: #22c55e; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
+            🚀 Запустить рекомендуемый тест
+        </button>
+    `;
+}
+
+// Специальная функция для принудительной синхронизации iOS
+async function forceIOSSync() {
+    console.log('🍎 iOS: Принудительная синхронизация...');
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (!isIOS) {
+        console.log('⚠️ Функция предназначена только для iOS устройств');
+        showNotification('Функция предназначена только для iOS', 'warning');
+        return;
+    }
+    
+    try {
+        // 1. Сначала сохраняем текущие данные в Firebase
+        console.log('💾 Шаг 1: Сохранение текущих данных в Firebase...');
+        const saveResult = await saveDataToFirebase();
+        
+        if (saveResult) {
+            console.log('✅ Данные сохранены в Firebase');
+            
+            // 2. Затем загружаем данные из Firebase
+            console.log('📥 Шаг 2: Загрузка данных из Firebase...');
+            await loadDataFromFirebaseFirst();
+            
+            // 3. Обновляем UI
+            console.log('🔄 Шаг 3: Обновление UI...');
+            updateProgressDisplay();
+            renderTasks();
+            generateCalendar();
+            
+            showNotification('🍎 iOS синхронизация завершена успешно!', 'success');
+            
+            // 4. Показываем детальную информацию
+            console.log('📊 iOS: Итоговая диагностика:');
+            console.log('  - Общий опыт:', appState.progress?.totalXP || 0);
+            console.log('  - Задачи:', appState.tasks?.length || 0);
+            console.log('  - Награды:', appState.rewards?.length || 0);
+            console.log('  - Активности:', Object.keys(appState.activityData || {}).length);
+            
+        } else {
+            console.log('❌ Ошибка сохранения в Firebase');
+            showNotification('Ошибка сохранения в Firebase', 'error');
+        }
+        
+    } catch (error) {
+        console.error('❌ iOS: Ошибка принудительной синхронизации:', error);
+        showNotification('Ошибка синхронизации: ' + error.message, 'error');
+    }
+}
+
+// Функция для диагностики iOS синхронизации
+function diagnoseIOSSync() {
+    console.log('🔍 iOS: Диагностика синхронизации...');
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    console.log('📱 iOS устройство:', isIOS);
+    
+    console.log('🌐 Онлайн:', navigator.onLine);
+    console.log('🔥 Firebase доступен:', isFirebaseAvailable());
+    
+    console.log('💾 localStorage данные:');
+    console.log('  - englishLearningData:', localStorage.getItem('englishLearningData') ? 'Есть' : 'Нет');
+    console.log('  - current-user:', localStorage.getItem('current-user'));
+    
+    console.log('📊 Текущее состояние приложения:');
+    console.log('  - Общий опыт:', appState.progress?.totalXP || 0);
+    console.log('  - Задачи:', appState.tasks?.length || 0);
+    console.log('  - Награды:', appState.rewards?.length || 0);
+    console.log('  - Активности:', Object.keys(appState.activityData || {}).length);
+    console.log('  - Пользователь:', appState.userName);
+    console.log('  - Роль:', appState.role);
+    
+    showNotification('Диагностика iOS завершена - проверьте консоль', 'info');
+}
+
+// Функция для переключения видимости блока технической диагностики
+function showTechDiagnosticsBlock() {
+    console.log('🔧 Переключение блока технической диагностики...');
+    
+    const block = document.getElementById('techDiagnosticsBlock');
+    const blockContent = block?.querySelector('.settings-block-content');
+    const blockTitle = block?.querySelector('.settings-block-title');
+    
+    if (block && blockContent && blockTitle) {
+        const isCollapsed = blockContent.classList.contains('collapsed');
+        
+        if (isCollapsed) {
+            // Разворачиваем блок
+            blockContent.classList.remove('collapsed');
+            blockContent.classList.add('expanded');
+            blockTitle.classList.remove('collapsed');
+            console.log('✅ Блок технической диагностики развернут');
+            showNotification('Блок технической диагностики развернут', 'success');
+            
+            // Показываем все кнопки
+            const buttons = blockContent.querySelectorAll('.settings-item');
+            console.log('🔧 Найдено кнопок в блоке:', buttons.length);
+            buttons.forEach((btn, index) => {
+                console.log(`  ${index + 1}. ${btn.textContent.trim()}`);
+            });
+        } else {
+            // Сворачиваем блок
+            blockContent.classList.remove('expanded');
+            blockContent.classList.add('collapsed');
+            blockTitle.classList.add('collapsed');
+            console.log('✅ Блок технической диагностики свернут');
+            showNotification('Блок технической диагностики свернут', 'info');
+        }
+    } else {
+        console.error('❌ Блок технической диагностики не найден');
+        showNotification('Блок технической диагностики не найден', 'error');
+    }
+}
+
+// Регистрируем функции глобально
+if (typeof window !== 'undefined') {
+    window.openTestPage = openTestPage;
+    window.showTestSelector = showTestSelector;
+    window.hideTestSelectorModal = hideTestSelectorModal;
+    window.updateDeviceInfoDisplay = updateDeviceInfoDisplay;
+    window.updateRecommendedTest = updateRecommendedTest;
+    window.forceIOSSync = forceIOSSync;
+    window.diagnoseIOSSync = diagnoseIOSSync;
+    window.showTechDiagnosticsBlock = showTechDiagnosticsBlock;
+    console.log('🧪 Test functions registered globally');
 }
         
         

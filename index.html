@@ -93,6 +93,10 @@
                         📱
                         Установить приложение
                     </div>
+                    <div class="settings-item" onclick="showTechDiagnosticsBlock()" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+                        🔧
+                        Переключить техническую диагностику
+                    </div>
                     </div>
                 </div>
                 
@@ -136,6 +140,30 @@
                         <div class="settings-item" onclick="checkDeviceCapabilities()">
                             📱
                             Диагностика устройства
+                        </div>
+                        <div class="settings-item" onclick="openTestPage('test.html')">
+                            🧪
+                            Общий тест приложения
+                        </div>
+                        <div class="settings-item" onclick="openTestPage('test-app-ios.html')">
+                            🍎
+                            iOS тест приложения
+                        </div>
+                        <div class="settings-item" onclick="openTestPage('test-iphone.html')">
+                            📱
+                            iPhone эмулятор
+                        </div>
+                        <div class="settings-item" onclick="showTestSelector()">
+                            🔧
+                            Выбор теста по устройству
+                        </div>
+                        <div class="settings-item" onclick="forceIOSSync()" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+                            🍎
+                            Принудительная iOS синхронизация
+                        </div>
+                        <div class="settings-item" onclick="diagnoseIOSSync()" style="background: #f0f9ff; border-left: 4px solid #3b82f6;">
+                            🔍
+                            Диагностика iOS синхронизации
                         </div>
                     </div>
                 </div>
@@ -1293,5 +1321,54 @@
                 }
             }
         </script>
+        
+        <!-- Модальное окно выбора теста -->
+        <div class="modal" id="testSelectorModal">
+            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="testSelectorModalTitle" style="max-width:600px; position:relative;">
+                <button class="close-btn" onclick="hideTestSelectorModal()">&times;</button>
+                <div class="modal-header">
+                    <h3 class="modal-title" id="testSelectorModalTitle">🔧 Выбор теста по устройству</h3>
+                </div>
+                <div class="test-selector-content">
+                    <div class="device-info">
+                        <h4>📱 Информация об устройстве:</h4>
+                        <div id="deviceInfoDisplay"></div>
+                    </div>
+                    
+                    <div class="test-options">
+                        <h4>🧪 Доступные тесты:</h4>
+                        
+                        <div class="test-option" onclick="openTestPage('test.html')">
+                            <div class="test-icon">🧪</div>
+                            <div class="test-info">
+                                <div class="test-name">Общий тест приложения</div>
+                                <div class="test-description">Базовое тестирование функций приложения</div>
+                            </div>
+                        </div>
+                        
+                        <div class="test-option" onclick="openTestPage('test-app-ios.html')">
+                            <div class="test-icon">🍎</div>
+                            <div class="test-info">
+                                <div class="test-name">iOS тест приложения</div>
+                                <div class="test-description">Специальное тестирование для iOS устройств</div>
+                            </div>
+                        </div>
+                        
+                        <div class="test-option" onclick="openTestPage('test-iphone.html')">
+                            <div class="test-icon">📱</div>
+                            <div class="test-info">
+                                <div class="test-name">iPhone эмулятор</div>
+                                <div class="test-description">Полная эмуляция iPhone с диагностикой ошибок</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommended-test">
+                        <h4>💡 Рекомендуемый тест:</h4>
+                        <div id="recommendedTest"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

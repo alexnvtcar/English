@@ -668,6 +668,13 @@ function applyRolePermissions() {
     const isViewer = appState.role === 'viewer';
     const isMikhail = appState.userName === 'Михаил';
     
+    // Устанавливаем класс для пользователя Михаил
+    if (isMikhail) {
+        document.body.classList.add('user-mikhail');
+    } else {
+        document.body.classList.remove('user-mikhail');
+    }
+    
     // Отключаем только функции наград для не-Михаила (но сохраняем функционал Админа)
     const rewardControls = [
         'button[onclick^="showRewardModal"]',
@@ -746,9 +753,15 @@ function applyRolePermissions() {
             if (isViewer) {
                 // Скрываем блоки для Михаила (viewer)
                 element.style.display = 'none';
+                element.style.visibility = 'hidden';
+                element.style.height = '0';
+                element.style.overflow = 'hidden';
             } else {
                 // Показываем блоки для Админа
                 element.style.display = '';
+                element.style.visibility = 'visible';
+                element.style.height = '';
+                element.style.overflow = '';
             }
         }
         
@@ -756,12 +769,42 @@ function applyRolePermissions() {
             if (isViewer) {
                 // Скрываем разделители для Михаила (viewer)
                 divider.style.display = 'none';
+                divider.style.visibility = 'hidden';
+                divider.style.height = '0';
+                divider.style.overflow = 'hidden';
             } else {
                 // Показываем разделители для Админа
                 divider.style.display = '';
+                divider.style.visibility = 'visible';
+                divider.style.height = '';
+                divider.style.overflow = '';
             }
         }
     });
+    
+    // Дополнительная проверка для блока технической диагностики
+    if (isViewer) {
+        const techBlock = document.getElementById('techDiagnosticsBlock');
+        const techDivider = document.getElementById('dividerBeforeTech');
+        
+        if (techBlock) {
+            techBlock.style.display = 'none !important';
+            techBlock.style.visibility = 'hidden !important';
+            techBlock.style.height = '0 !important';
+            techBlock.style.overflow = 'hidden !important';
+            techBlock.style.margin = '0 !important';
+            techBlock.style.padding = '0 !important';
+        }
+        
+        if (techDivider) {
+            techDivider.style.display = 'none !important';
+            techDivider.style.visibility = 'hidden !important';
+            techDivider.style.height = '0 !important';
+            techDivider.style.overflow = 'hidden !important';
+            techDivider.style.margin = '0 !important';
+            techDivider.style.padding = '0 !important';
+        }
+    }
     
     // Восстанавливаем состояние блоков (все свернуты по умолчанию)
     restoreSettingsBlocksState();
@@ -3853,6 +3896,31 @@ function toggleSettingsMenu() {
         // Анимация появления кнопки закрытия
         if (closeBtn) {
             closeBtn.style.animation = 'closeBtnAppear 0.5s ease-out';
+        }
+        
+        // Принудительно скрываем блок технической диагностики для Михаила
+        const isViewer = appState.role === 'viewer';
+        if (isViewer) {
+            const techBlock = document.getElementById('techDiagnosticsBlock');
+            const techDivider = document.getElementById('dividerBeforeTech');
+            
+            if (techBlock) {
+                techBlock.style.display = 'none !important';
+                techBlock.style.visibility = 'hidden !important';
+                techBlock.style.height = '0 !important';
+                techBlock.style.overflow = 'hidden !important';
+                techBlock.style.margin = '0 !important';
+                techBlock.style.padding = '0 !important';
+            }
+            
+            if (techDivider) {
+                techDivider.style.display = 'none !important';
+                techDivider.style.visibility = 'hidden !important';
+                techDivider.style.height = '0 !important';
+                techDivider.style.overflow = 'hidden !important';
+                techDivider.style.margin = '0 !important';
+                techDivider.style.padding = '0 !important';
+            }
         }
     }
 }
@@ -8546,6 +8614,15 @@ function restoreSettingsBlocksState() {
 function toggleSettingsBlock(blockTitle) {
     const blockContent = blockTitle.nextElementSibling;
     if (blockContent && blockContent.classList.contains('settings-block-content')) {
+        // Проверяем, не пытается ли Михаил развернуть блок технической диагностики
+        const isMikhail = appState.userName === 'Михаил';
+        const isTechBlock = blockTitle.textContent.trim() === 'Техническая диагностика';
+        
+        if (isMikhail && isTechBlock) {
+            console.log('🚫 Михаил не может развернуть блок технической диагностики');
+            return; // Блокируем разворачивание
+        }
+        
         const isCurrentlyCollapsed = blockContent.classList.contains('collapsed');
         
         if (isCurrentlyCollapsed) {

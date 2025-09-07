@@ -3283,6 +3283,17 @@
                 }
             }
             
+            /* Скрытие блока технической диагностики для Михаила */
+            .user-mikhail #techDiagnosticsBlock,
+            .user-mikhail #dividerBeforeTech {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                overflow: hidden !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
             /* iOS Safari Specific Fixes */
             @supports (-webkit-touch-callout: none) {
                 /* Оптимизация уведомлений для iOS */
